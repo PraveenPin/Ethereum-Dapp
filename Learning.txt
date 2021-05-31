@@ -1,0 +1,3 @@
+truffle console :
+after deploying our smart contract to the blockchain using truffle migrate,
+we can use truffle's console to interact directly with the contract using javascript
