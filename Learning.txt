@@ -1,3 +1,9 @@
 truffle console :
 after deploying our smart contract to the blockchain using truffle migrate,
 we can use truffle's console to interact directly with the contract using javascript
+
+all the calls to the blockchain are asynchornous, it returns promises so we use await/async.
+
+msg.sender - > gives the address of the caller
+
+for tests we can add metadata, even though they are not required as function args that we are testing
