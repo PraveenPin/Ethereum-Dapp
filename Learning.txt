@@ -7,3 +7,9 @@ all the calls to the blockchain are asynchornous, it returns promises so we use 
 msg.sender - > gives the address of the caller
 
 for tests we can add metadata, even though they are not required as function args that we are testing
+
+Gas Fee:
+Anytime we write an info to the blockchain, we have to pay a gas fee like a transactions fee
+we have to also pay gas fee to call a functions of smart contracts that write/modify data on blockchain, but reads are fee
+
+no floating point numbers on blockchain -> so we use unit WEI
