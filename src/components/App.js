@@ -80,28 +80,30 @@ class App extends Component {
   }
 
  createAPost = (content) => {
-    this.setState({ loading: true });
+    this.setState({ isLoading: true }, () => console.log("A.",this.state.isLoading));
     this.state.socialNetwork.methods.createPost(content).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       console.log("receipt",receipt);
-      this.setState({ loading: false });
+      this.setState({ isLoading: false, appple: 'apple' },() => console.log("C.",this.state));
     });
   }
 
-  tipAPost = (id, tipAmount) => {
-    this.setState({ loading: true });
+  tipAPost= (id, tipAmount)=>{
+    this.setState({ isLoading: true });
+    console.log("isLoading:",this.state);
     this.state.socialNetwork.methods.tipAPost(id).send({ from: this.state.account, value: tipAmount })
     .once('receipt', (receipt) => {
-      this.setState({ loading: false }, () => window.location.reload());
-    })
+      console.log("r:",receipt);
+      this.setState({ isLoading: false, appple: 'apple' },() => console.log("D.",this.state));
+    });
+    this.setState({ isLoading: false, appple: 'apple' },() => console.log("D.",this.state));
   }
 
   render() {
-    console.log("Posts:",this.state.posts);
     return (
       <div>
         <NavBar account = {this.state.account}/>
-        {this.state.isLoading ? <div id="loader" className="text-center"> <p>Loading......</p></div> : 
+        {this.state.isLoading ? <div id="loader" className="text-center"> <p style={{ marginTop: '65px'}}>Loading......</p></div> : 
                               <Main posts={this.state.posts} tipPost={this.tipAPost} createPost={this.createAPost}/>
         }
       </div>

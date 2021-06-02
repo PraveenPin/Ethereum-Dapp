@@ -19,9 +19,9 @@ contract SocialNetwork{
         name = "ETH - SocialNetwork";
     }
 
-    event PostCreated(uint id, string content, uint tipAmount, address author);
+    event PostCreated(uint pid, string content, uint tipAmount, address author);
 
-    event PostTipped(uint id, string content, uint tipAmount, address author);
+    event PostTipped(uint pid, string content, uint tipAmount, address author);
 
     function createPost(string memory _content) public{ 
         //require valid content
@@ -47,7 +47,7 @@ contract SocialNetwork{
         //here the tip should be ether, so we use function meta data
         _post.tipAmount = _post.tipAmount + msg.value;
         posts[_id] = _post;
-        emit PostCreated(postCount, _post.content, _post.tipAmount, _author);
+        emit PostTipped(postCount, _post.content, _post.tipAmount, _author);
     }
 
 }

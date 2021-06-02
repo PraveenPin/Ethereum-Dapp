@@ -45,7 +45,7 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
             assert.equal(postCount,1);
             
             const event = result.logs[0].args;
-            assert.equal(event.id.toNumber(), postCount.toNumber(), 'id is correct');
+            assert.equal(event.pid.toNumber(), postCount.toNumber(), 'id is correct');
             assert.equal(event.content, 'This is my first post','content is correct');
             assert.equal(event.tipAmount, '0', 'Tip Amount is correct');
             assert.equal(event.author, author,'Author is correct');
@@ -55,7 +55,7 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
         
         it('lists posts', async () => {
             const post = await socialNetwork.posts(postCount);
-            // assert.equal(post.id.toNumber(), postCount.toNumber(), 'id is correct');
+            assert.equal(post.pid.toNumber(), postCount.toNumber(), 'id is correct');
             assert.equal(post.content, 'This is my first post','content is correct');
             assert.equal(post.tipAmount, '0', 'Tip Amount is correct');
             assert.equal(post.author, author,'Author is correct');
@@ -69,7 +69,7 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
             result =  await socialNetwork.tipAPost(postCount, { from: tipper, value: web3.utils.toWei('1', 'Ether') });
             
             const event = result.logs[0].args;
-            // assert.equal(event.id.toNumber(), postCount.toNumber(), 'id is correct');
+            assert.equal(event.pid.toNumber(), postCount.toNumber(), 'id is correct');
             assert.equal(event.content, 'This is my first post','content is correct');
             assert.equal(event.tipAmount, '1000000000000000000', 'Tip Amount is correct');
             assert.equal(event.author, author,'Author is correct');

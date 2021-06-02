@@ -27,7 +27,7 @@ class Main extends Component {
                 <button type="submit" className="btn btn-primary btn-block">Share</button>
               </form>
               <p>&nbsp;</p>
-              { this.props.posts.map((post, index) => {
+              {this.props.posts.map((post, index) => {
                 return(
                   <div className="card mb-4" key={index} >
                     <div className="card-header">
@@ -49,7 +49,7 @@ class Main extends Component {
                         </small>
                         <button
                           className="btn btn-link btn-sm float-right pt-0"
-                          name={post.id}
+                          name={post.pid}
                           onClick={(event) => {
                             let tipAmount = window.web3.utils.toWei('0.1', 'Ether');
                             console.log(event.target.name, tipAmount);
