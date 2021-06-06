@@ -19,12 +19,13 @@ Plan:
 ------------
 1. Card for each post, with support for attaching text,tip, follow the author, tags,photo(IPFS) - later,url,video    
     a. Profile - author id,name,followers count,following count, my posts, total tip obtained, total tip donated - done
-    1. followers authors list with (name,id, address ), following authors list (name,id, address )
+    1. followers authors list with (name,id, address, posts ), following authors list (name,id, address, posts )
     b. Enter arbitrary tip amount - form with text box, submit, send tip, emit event 
     c. Comments -> dynamic array - sender, comment - string 
                                  - pop on click on a sender id, follow, report
     d. tags for each post
-2. Feed to show posts of the followed
-    - following list for each user/author/tipper - using mapping
-3. Profile with pic, name, transaction history, Logs
+2. Feed to show posts of the followed - following list for each user/author/tipper - using mapping - done
+C. work with events, logs - 
+3. Profile with pic, name - done
+    b. transaction history, Logs
 4. Explore posts, with tags - search bar with tags, followers , all posts

@@ -45,6 +45,7 @@ contract SocialNetwork is owned{
 
     function autoCreateUser(string memory _uname) public {        
         require(bytes(_uname).length > 0);
+        userCount++;
         User storage _user = users[userCount];
         emit AutoCreateUser(msg.sender, "Creating User");            
         _user.id = userCount;
@@ -55,7 +56,6 @@ contract SocialNetwork is owned{
         _user.tipObtained = 0;
         _user.tipDonated = 0;
         addressToUid[msg.sender] = userCount;
-        userCount++;
         emit AutoCreateUser(msg.sender, "User Created");
     }
 
@@ -91,43 +91,58 @@ contract SocialNetwork is owned{
 
     event FetchMyPosts(address indexed addr, uint[] myPostIds);
 
-    event FetchFollowingPosts(address indexed sender, uint[] postIds);
+    event FetchMyNetworkIds(address indexed sender, uint[] followingIds, uint[] followerIds);
 
-    function getMyPosts(uint _id) public returns (Post[] memory){
-        uint[] memory postIds = new uint[](postCount);
-        Post[] memory myPosts = new Post[](postCount);
+    function getMyPosts(uint _id) public returns (uint[] memory, Post[] memory){        
+        uint myPostCount = 0;
         uint counter = 0;
+
         User storage _user = users[_id];
+        for (uint i = 1; i <= postCount; i++){
+            if(_user.myPostIds[i]){
+                myPostCount++;
+            }
+        }
+        
+        uint[] memory postIds = new uint[](myPostCount);
+        Post[] memory myPosts = new Post[](myPostCount);
         
         for (uint i = 1; i <= postCount; i++){
-            if(_user.myPostIds[i] == true){
+            if(_user.myPostIds[i]){
                 postIds[counter] = i;
-                if(posts[i].authorId != 0){
-                    myPosts[counter++] = posts[i];
-                }
+                myPosts[counter++] = posts[i];
             }
         }
         emit FetchMyPosts(msg.sender,postIds);
-        return myPosts;
+        return (postIds, myPosts);
     }
 
-    function getFollowingPosts() public returns (Post[] memory){
-        uint[] memory postIds;
-        Post[] memory allPosts;
+    function getAllFollowingIds() public returns (uint[] memory, uint[] memory){
+        uint myId = addressToUid[msg.sender];
+        require(myId > 0 && myId <= userCount);
+        User storage _user = users[myId];
+        uint[] memory followingIds = new uint[](_user.followingCount);
+        uint[] memory followerIds = new uint[](_user.followersCount);
         uint counter = 0;
-        for(uint userId = 1; userId <= userCount; userId++){
-            User storage _user = users[userId];
-            if(_user.followingIds[userId]){
-                for (uint i = 1; i <= postCount; i++){
-                    if(users[userId].myPostIds[i]){
-                        postIds[counter] = i;
-                        allPosts[counter++] = posts[i];
-                    }
-                }
+        for (uint i = 1; i <= userCount; i++){
+            if(_user.followingIds[i]){
+                followingIds[counter++] = i;
             }
         }
-        emit FetchFollowingPosts(msg.sender,postIds);
-        return allPosts;
+        counter = 0;
+        for (uint i = 1; i <= userCount; i++){
+            if(_user.followerIds[i]){
+                followerIds[counter++] = i;
+            }
+        }
+        emit FetchMyNetworkIds(msg.sender,followingIds,followerIds);
+        return (followingIds,followerIds);
+    }
+
+    function getUserData(uint _uid) public view returns (uint, string memory, uint, uint, uint, uint){     
+        require(_uid > 0);   
+        User storage _user = users[_uid];
+        return (_user.id, _user.name, _user.followersCount, _user.followingCount, _user.tipObtained, _user.tipDonated);
     }
 
     event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author);

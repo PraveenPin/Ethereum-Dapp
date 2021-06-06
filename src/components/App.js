@@ -18,9 +18,15 @@ class App extends Component {
       allPosts: [],
       myPosts: [],
       isLoading: true,
-      userData: null
+      userData: null,
+      // myFollowingIds: [],
+      // myFollowerIds: [],
+      // followingPosts: [],
+      // followerPosts: []
+
     }
     this.explorePosts = this.explorePosts.bind(this);
+    // this.getNetworkPosts = this.getNetworkPosts.bind(this);
   }
 
   async componentDidMount(){
@@ -86,9 +92,10 @@ class App extends Component {
           followingCount: userInfo[3],
           tipObtained: userInfo[4],
           tipDonated: userInfo[5]
-        }, myPosts: myPosts });
+        }, myPosts: myPosts[1] });
       }      
       this.explorePosts();
+      // this.fetchNetworkIds();
     }
     else{
       window.alert("Social Network contract not deployed to detected network");
@@ -125,11 +132,38 @@ class App extends Component {
     //call methods just read data from blockchain, costs no gas
     //send methods writes data on blockchain, costs gas
     this.setState({ postCount });
-    for(var i = 0; i <= postCount; i++){
+    for(var i = 1; i <= postCount; i++){
       let post = await this.state.socialNetwork.methods.posts(i).call();
       this.setState({ isLoading: false, allPosts: [...this.state.allPosts, post ]});
     }
+    this.setState({ isLoading: false });
   }
+
+  // fetchNetworkIds = () => {
+  //   this.state.socialNetwork.methods.getAllFollowingIds().call({from: this.state.account})
+  //   .then((result) => {
+  //     console.log("Ner",result);
+  //     this.setState({ myFollowingIds: result[0] ,myFollowerIds: result[1]});
+  //   });
+    
+  //   this.getNetworkPosts();
+  // }
+
+  // async getNetworkPosts(){
+  //   const result = await this.state.socialNetwork.methods.getAllFollowingIds().call({from: this.state.account});
+  //   this.setState({ myFollowingIds: result[0] ,myFollowerIds: result[1]});
+  //   console.log("A:",this.state.myFollowingIds);
+  //   for(let i = 0; i<this.state.myFollowingIds.length;i++){
+  //     let posts = await this.state.socialNetwork.methods.getMyPosts(this.state.myFollowingIds[i]).call({from: this.state.account});
+  //     console.log("PosA:",posts[1])
+  //     this.setState({ followingPosts: [...this.state.followingPosts, posts[1]]});
+  //   }
+  //   for(let i = 0; i<this.state.myFollowerIds.length;i++){
+  //     let posts = await this.state.socialNetwork.methods.getMyPosts(this.state.myFollowerIds[i]).call({from: this.state.account});
+  //     console.log("PosB:",posts)
+  //     this.setState({ followerPosts: [...this.state.followerPosts, posts[1]]});
+  //   }
+  // }
 
   render() {
     return (
@@ -143,6 +177,8 @@ class App extends Component {
                                         <Profile
                                           userData={this.state.userData}
                                           myPosts={this.state.myPosts}
+                                          socialNetwork={this.state.socialNetwork}
+                                          account={this.state.account}
                                         />
                                     )}
                                 </div>

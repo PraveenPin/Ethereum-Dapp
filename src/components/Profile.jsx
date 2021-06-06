@@ -1,15 +1,39 @@
 import React, { Component } from 'react';
 import Identicon from 'identicon.js';
+import UserList from './UserList.jsx';
 
 class Profile extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      isLoading: true,
+      myFollowingIds: [],
+      myFollowerIds: [],
+    }
+  }
+
+  componentDidMount(){
+    this.fetchNetworkIds();
+  }
+
+  fetchNetworkIds = () => {
+    this.setState({ isLoading: true });
+    this.props.socialNetwork.methods.getAllFollowingIds().call({from: this.props.account})
+    .then((result) => {
+      console.log("Ner",result);
+      this.setState({ isLoading: false, myFollowingIds: result[0] ,myFollowerIds: result[1]});
+    });
+    // this.setState({ isLoading: false });
+  }
 
   render() {
     const {myPosts, userData} = this.props;
     return (
       <div>
-        <div className="row" style={{ flexDirection: 'column-reverse'}}>
-          <div>Author Id: {window.web3.utils.hexToNumber(userData.id)}</div>
-          <div>Author Name: {userData.name}</div>
+        <div className="row" style={{ flexDirection: 'column'}}>
+          <div>Id: {window.web3.utils.hexToNumber(userData.id)}</div>
+          <div>Name: {userData.name}</div>
           <div>Followers: {window.web3.utils.hexToNumber(userData.followersCount)}</div>
           <div>Following: {window.web3.utils.hexToNumberString(userData.followingCount)}</div>
           <div>Total Tip Obtained : {window.web3.utils.fromWei(userData.tipObtained.toString(), 'Ether')} ETH</div>
@@ -43,6 +67,22 @@ class Profile extends Component {
                       </li>
                     </ul>
                 </div>)})}
+                <div>{this.state.isLoading ? "Loading Following List...." : 
+                  <UserList 
+                    heading={"Following"}
+                    idList={this.state.myFollowingIds}
+                    socialNetwork={this.props.socialNetwork}
+                    account={this.props.account}
+                  />}
+                </div>
+                <div>{this.state.isLoading ? "Loading Followers List...." : 
+                  <UserList 
+                    heading={"Followers"} 
+                    idList={this.state.myFollowerIds} 
+                    socialNetwork={this.props.socialNetwork}
+                    account={this.props.account}
+                  />}
+                </div>
               </div>
             </div>
         </div>
