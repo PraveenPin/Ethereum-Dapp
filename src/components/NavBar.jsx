@@ -24,7 +24,7 @@ class NavBar extends Component {
                   <small className="text-secondary">
                         <small id="account">{this.props.account}</small>
                   </small>
-                  <img className="ml-2" width="30" height="30" 
+                  <img className="ml-2" width="30" height="30" alt={`my-identicon`}
                     src={"data:image/png;base64,"+data}
                   />
               </li>

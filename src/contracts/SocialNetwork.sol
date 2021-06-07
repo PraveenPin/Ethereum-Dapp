@@ -75,18 +75,19 @@ contract SocialNetwork is owned{
         users[_authorId].followerIds[senderId] = true;
         users[senderId].followingCount = followingCount+1;
         users[_authorId].followersCount = authorsFollowersCount+1;
-        emit FollowOrUnFollowUser(msg.sender,senderId, _authorId, "Following the author with new count",followingCount+1);
+        emit FollowOrUnFollowUser(msg.sender, senderId, _authorId, "Following the author with new count", followingCount+1);
     }
 
     function unFollowAuthor(uint _authorId) public checkAddress{
         uint senderId = addressToUid[msg.sender];
+        require(senderId != _authorId);
         uint followingCount = users[senderId].followingCount;
         uint authorsFollowersCount = users[_authorId].followersCount;
         users[senderId].followingIds[_authorId] = false;
-        users[_authorId].followerIds[senderId] = false;
         users[senderId].followingCount = followingCount-1;
+        users[_authorId].followerIds[senderId] = false;
         users[_authorId].followersCount = authorsFollowersCount-1;
-        emit FollowOrUnFollowUser(msg.sender, senderId, _authorId, "UnFollowing the author with new count",followingCount -1);
+        emit FollowOrUnFollowUser(msg.sender, senderId, _authorId, "UnFollowing the author with new count", followingCount -1);
     }
 
     event FetchMyPosts(address indexed addr, uint[] myPostIds);

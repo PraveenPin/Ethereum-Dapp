@@ -57,17 +57,25 @@ class UserList extends Component {
   }
 
   unFollowAuthor = (authorId) => {
-    console.log("Account:",this.props.account);
-    this.props.socialNetwork.methods.unfollowAuthor(authorId).send({ from: this.props.account })
+    this.props.socialNetwork.methods.unFollowAuthor(authorId).send({ from: this.props.account })
     .once('receipt', (receipt) => {
       console.log("r:",receipt);
     });
     //notification for following
   }
 
+  followAuthor = (authorId) => {
+    this.props.socialNetwork.methods.followAuthor(authorId).send({ from: this.props.account })
+    .once('receipt', (receipt) => {
+      console.log("r:",receipt);
+    });
+    //notification for following
+  }  
+
   render() {
     //remove this and place this call in onClick of ListGroupItem
-    return (
+    console.log("Account:",this.props.followingIdStringList);
+   return (
       <div>
         <Button variant="primary" onClick={this.handleShow}>
           {`See ${this.props.heading} List`}
@@ -85,7 +93,7 @@ class UserList extends Component {
           </Modal.Header>
           <Modal.Body>
             <ListGroup variant="flush">
-              {this.state.isLoading ? "Loading ...." :
+              {this.state.isLoading ? "Loading ...." : this.state.usersInfo.length === 0 ? `${this.props.heading} No one` :
               this.state.usersInfo.map((userData,index) => (
                 <ListGroup.Item key={`list-group-item-${index}`} onClick={() => console.log("Click")}
                   style={{ display: 'flex', justifyContent: 'space-around'}}>
@@ -98,10 +106,28 @@ class UserList extends Component {
                   
                   <Button variant="primary" onClick={() => this.handleShowProfileModal(userData[0])}>
                     {`Open Profile`}
-                  </Button>
-                  <Button variant="primary">
-                    {`UnFollow`}
-                  </Button>
+                  </Button>                  
+                  {(this.props.heading === "Followers" && (this.props.followingIdStringList.length === 0 || this.props.followingIdStringList.indexOf(userData[0].toString()) === -1)) ?
+                  (<button
+                    className="btn btn-link btn-sm float-right pt-0"
+                    name={`follow-${index}`}
+                    onClick={(event) => {
+                      console.log(event.target.name, "Following the author");
+                      this.followAuthor(userData[0]);
+                    }}
+                  >
+                    Follow Author
+                  </button>):
+                  (<button
+                    className="btn btn-link btn-sm float-right pt-0"
+                    name={`unfollow-${index}`}
+                    onClick={(event) => {
+                      console.log(event.target.name, "unFollowing the author");
+                      this.unFollowAuthor(userData[0]);
+                    }}
+                  >
+                    UnFollow Author
+                  </button>)}
                 </ListGroup.Item>))}
             </ListGroup>
           </Modal.Body>
@@ -137,6 +163,7 @@ class UserList extends Component {
                           className='mr-2'
                           width='30'
                           height='30'
+                          alt={`identicon-${index}`}
                           src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                         />
                         <small className="text-muted">{post.author}:{window.web3.utils.hexToNumber(post.authorId)}</small>
@@ -163,16 +190,27 @@ class UserList extends Component {
                           >
                             TIP 0.1 ETH
                           </button>
-                          <button
+                         {(this.props.followingIdStringList.length === 0 || this.props.followingIdStringList.indexOf(post.authorId.toString()) === -1) ?
+                         ( <button
                             className="btn btn-link btn-sm float-right pt-0"
                             name={`follow-${post.pid}`}
                             onClick={(event) => {
                               console.log(event.target.name, "Following the author");
+                              this.followAuthor(post.authorId);
+                            }}
+                          >
+                            Follow Author
+                          </button>)
+                         :( <button
+                            className="btn btn-link btn-sm float-right pt-0"
+                            name={`follow-${post.pid}`}
+                            onClick={(event) => {
+                              console.log(event.target.name, "UnFollowing the author");
                               this.unFollowAuthor(post.authorId);
                             }}
                           >
                             UnFollow Author
-                          </button>
+                          </button>)}
                         </li>
                       </ul>
                     </div>

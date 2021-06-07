@@ -119,14 +119,6 @@ class App extends Component {
     this.setState({ isLoading: false });
   }
 
-  followAuthor = (authorId) => {
-    this.state.socialNetwork.methods.followAuthor(authorId).send({ from: this.state.account })
-    .once('receipt', (receipt) => {
-      console.log("r:",receipt);
-    });
-    //notification for following
-  }
-
   async explorePosts(){
     const postCount = await this.state.socialNetwork.methods.postCount().call(); // this calls the method and returns the postCount
     //call methods just read data from blockchain, costs no gas
@@ -186,7 +178,8 @@ class App extends Component {
                                   <Card posts={this.state.allPosts} 
                                     tipPost={this.tipAPost} 
                                     createPost={this.createAPost}
-                                    followAuthor={this.followAuthor}
+                                    socialNetwork={this.state.socialNetwork}
+                                    account={this.state.account}
                                   />
                                 </div>
                              </div>

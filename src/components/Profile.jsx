@@ -10,6 +10,7 @@ class Profile extends Component {
       isLoading: true,
       myFollowingIds: [],
       myFollowerIds: [],
+      followingIdStringList: []
     }
   }
 
@@ -21,10 +22,18 @@ class Profile extends Component {
     this.setState({ isLoading: true });
     this.props.socialNetwork.methods.getAllFollowingIds().call({from: this.props.account})
     .then((result) => {
-      console.log("Ner",result);
-      this.setState({ isLoading: false, myFollowingIds: result[0] ,myFollowerIds: result[1]});
+      console.log("Ner",result, this.state);
+      this.setState({ isLoading: false, myFollowingIds: result[0] ,myFollowerIds: result[1]} , () => this.convertFollowingIdsFromBNtoStrings());
     });
-    // this.setState({ isLoading: false });
+  }
+
+  convertFollowingIdsFromBNtoStrings = () => {
+    this.setState({ isLoading: true });
+    let followingIdStringList = [];
+    this.state.myFollowingIds.map((idBN,index) => {
+      followingIdStringList.push(idBN.toString());
+    });
+    this.setState({ isLoading: false, followingIdStringList: followingIdStringList });
   }
 
   render() {
@@ -49,6 +58,7 @@ class Profile extends Component {
                         className='mr-2'
                         width='30'
                         height='30'
+                        alt={`identicon-${index}`}
                         src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                       />
                       <small className="text-muted">{post.author}:{window.web3.utils.hexToNumber(post.authorId)}</small>
@@ -71,6 +81,7 @@ class Profile extends Component {
                   <UserList 
                     heading={"Following"}
                     idList={this.state.myFollowingIds}
+                    followingIdStringList={this.state.followingIdStringList}
                     socialNetwork={this.props.socialNetwork}
                     account={this.props.account}
                   />}
@@ -78,7 +89,8 @@ class Profile extends Component {
                 <div>{this.state.isLoading ? "Loading Followers List...." : 
                   <UserList 
                     heading={"Followers"} 
-                    idList={this.state.myFollowerIds} 
+                    idList={this.state.myFollowerIds}
+                    followingIdStringList={this.state.followingIdStringList}
                     socialNetwork={this.props.socialNetwork}
                     account={this.props.account}
                   />}

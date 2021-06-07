@@ -19,8 +19,8 @@ Plan:
 ------------
 1. Card for each post, with support for attaching text,tip, follow the author, tags,photo(IPFS) - later,url,video    
     a. Profile - author id,name,followers count,following count, my posts, total tip obtained, total tip donated - done
-    1. followers authors list with (name,id, address, posts ), following authors list (name,id, address, posts )
-    b. Enter arbitrary tip amount - form with text box, submit, send tip, emit event 
+    1. followers authors list with (name,id, address, posts ), following authors list (name,id, address, posts ) - done
+    b. Enter arbitrary tip amount - form with text box, submit, send tip, emit event - done
     c. Comments -> dynamic array - sender, comment - string 
                                  - pop on click on a sender id, follow, report
     d. tags for each post
