@@ -180,16 +180,26 @@ class UserList extends Component {
                             TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
                           </small>
                           <button
+                            id={`button-modal-tipAmount${index}`}
                             className="btn btn-link btn-sm float-right pt-0"
                             name={post.pid}
                             onClick={(event) => {
-                              let tipAmount = window.web3.utils.toWei('0.1', 'Ether');
-                              console.log(event.target.name, tipAmount);
-                              this.props.tipPost(event.target.name, tipAmount);
+                              const tip = document.getElementById(`modal-tipAmount${index}`).value;
+                              if(document.getElementById(`modal-tipAmount${index}`).value){
+                                let tipAmount = window.web3.utils.toWei(tip.toString(), 'Ether');
+                                console.log(event.target.name, tipAmount);
+                                this.props.tipPost(event.target.name, tipAmount);
+                              }
                             }}
                           >
-                            TIP 0.1 ETH
-                          </button>
+                            TIP Ether
+                          </button>                        
+                          <input
+                              id={`modal-tipAmount${index}`}
+                              type="number"
+                              className="btn btn-link btn-sm float-right pt-0"
+                              placeholder="Tip 0.1 Ether?"
+                          />
                          {(this.props.followingIdStringList.length === 0 || this.props.followingIdStringList.indexOf(post.authorId.toString()) === -1) ?
                          ( <button
                             className="btn btn-link btn-sm float-right pt-0"

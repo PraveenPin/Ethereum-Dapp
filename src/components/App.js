@@ -170,7 +170,8 @@ class App extends Component {
                                           userData={this.state.userData}
                                           myPosts={this.state.myPosts}
                                           socialNetwork={this.state.socialNetwork}
-                                          account={this.state.account}
+                                          account={this.state.account} 
+                                          tipPost={this.tipAPost}
                                         />
                                     )}
                                 </div>

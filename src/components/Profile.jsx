@@ -84,6 +84,7 @@ class Profile extends Component {
                     followingIdStringList={this.state.followingIdStringList}
                     socialNetwork={this.props.socialNetwork}
                     account={this.props.account}
+                    tipPost={this.props.tipPost}
                   />}
                 </div>
                 <div>{this.state.isLoading ? "Loading Followers List...." : 
@@ -93,6 +94,7 @@ class Profile extends Component {
                     followingIdStringList={this.state.followingIdStringList}
                     socialNetwork={this.props.socialNetwork}
                     account={this.props.account}
+                    tipPost={this.props.tipPost}
                   />}
                 </div>
               </div>
