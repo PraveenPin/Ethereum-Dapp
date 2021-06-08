@@ -9,6 +9,7 @@ contract SocialNetwork is owned{
     mapping(uint => Post) public posts;/* Key Value Store, gets written to block chain itself */
     mapping(uint => User) public users;
     mapping(address => uint) public addressToUid;
+    mapping(uint => mapping(uint => Comment)) public comments;
 
     uint public postCount = 0;
     uint16 public userCount = 0;
@@ -33,6 +34,17 @@ contract SocialNetwork is owned{
         uint tipAmount;
         address payable author;
         uint authorId;
+        string authorName;
+        uint commentsCount;
+    }
+
+    struct Comment{
+        uint postId;
+        uint cid;
+        string comment;
+        address author;
+        uint authorId;
+        string authorName;
     }
 
     constructor () {
@@ -146,7 +158,7 @@ contract SocialNetwork is owned{
         return (_user.id, _user.name, _user.followersCount, _user.followingCount, _user.tipObtained, _user.tipDonated);
     }
 
-    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author);
+    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author, uint authorId, string authorName);
 
     function createPost(string memory _content, string memory _url) public{ 
         //require valid content
@@ -155,13 +167,13 @@ contract SocialNetwork is owned{
         /* Here _content is a local var and underscore is just a conventions for local vars*/
         postCount++;        
         uint userId = addressToUid[msg.sender];
-        posts[postCount] = Post(postCount, _content, "https://github.com/PraveenPin/Simple-Social-Network", 0, payable(msg.sender), userId); /* Instantiates Post, adds it into map */        
+        posts[postCount] = Post(postCount, _content, "https://github.com/PraveenPin/Simple-Social-Network", 0, payable(msg.sender), userId, users[userId].name, 0); /* Instantiates Post, adds it into map */        
         //adding the post id to the user
         users[userId].myPostIds[postCount] = true;
 
         //Trigger event from solidity smart contracts
         //these posts can be open for subscription by consumers
-        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender);
+        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender, userId, users[userId].name);
     }
 
     event PostTipped(uint pid, uint tipAmount, address author);
@@ -181,6 +193,46 @@ contract SocialNetwork is owned{
         //add tip amount to author's obtained tip
         users[_post.authorId].tipObtained += msg.value;
         emit PostTipped(postCount, _post.tipAmount, _author);
+    }
+
+    //functions, events to create and delete comments
+    event CommentDeleted(uint pid, uint cid, string deletedComment, address commentAuthor, string authorName);
+    event CommentCreated(uint pid, uint cid, string comment, address commentedUser, string authorName);
+
+    function createComment(uint _pid, string memory _comment) public {
+        require(_pid > 0 && _pid <= postCount);
+        Post memory _post = posts[_pid];
+        uint commentsCount = _post.commentsCount;
+        commentsCount++;
+        User storage _user = users[addressToUid[msg.sender]];
+        comments[_pid][commentsCount] = Comment(_pid, commentsCount, _comment, msg.sender, _user.id, _user.name);
+        posts[_pid].commentsCount = commentsCount;
+        emit CommentCreated(_pid, commentsCount, _comment, msg.sender, _user.name);
+    }
+
+    function deleteComment(uint _pid, uint _cid) public {
+        require(_pid > 0 && _pid <= postCount);
+        Post memory _post = posts[_pid];
+        uint commentsCount = _post.commentsCount;
+        require(_cid > 0 && _cid <= commentsCount);
+        Comment memory _comment = comments[_pid][_cid];
+        delete comments[_pid][_cid];
+        commentsCount--;
+        posts[_pid].commentsCount = commentsCount;
+        emit CommentDeleted(_pid, _cid, _comment.comment, _comment.author, _comment.authorName);
+
+    }
+
+    function fetchAllComments(uint _postId) public view returns (Comment[] memory){
+        require(_postId > 0 && _postId <= postCount);
+        Post memory _post = posts[_postId];
+        uint commentsCount = _post.commentsCount;
+        Comment[] memory postComments = new Comment[](commentsCount);
+
+        for(uint i=1; i<= commentsCount; i++){
+            postComments[i-1] = comments[_postId][i];
+        }
+        return postComments;
     }
 
     //self destruct event 

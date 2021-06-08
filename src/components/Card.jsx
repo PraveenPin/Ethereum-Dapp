@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {Button, Modal, ListGroup} from 'react-bootstrap';
 import Identicon from 'identicon.js';
 
 class Card extends Component {
@@ -11,7 +12,10 @@ class Card extends Component {
       myFollowerIds: [],
       // accBalance: 0.0,
       posts: this.props.posts,
-      followingIdStringList: []
+      followingIdStringList: [],
+      showCommentsModal: false,
+      activePostData: null,
+      activePostComments: []
     }
   }
 
@@ -58,6 +62,30 @@ class Card extends Component {
       console.log("r:",receipt);
     });
     //notification for following
+  }
+
+  openCommentsModal = (post) => {
+    this.setState({ showCommentsModal: true, activePostData: post }, () => this.fetchAllComments());
+  }
+
+  closeCommentsModal = () => {
+    this.setState({ showCommentsModal: false, activePostData: null, activePostComments: [] });
+  }
+
+  createComment = (postId, comment) => {
+    this.props.socialNetwork.methods.createComment(postId, comment).send({ from: this.props.account })
+    .once('receipt', (receipt) => {
+      console.log("receipt",receipt);
+    });
+    this.fetchAllComments();
+  }
+
+  fetchAllComments = () => {
+    this.props.socialNetwork.methods.fetchAllComments(this.state.activePostData.pid).call({ from: this.props.account })
+    .then((result) => {
+      console.log("Comment list", result[1]);
+      this.setState({ activePostComments : result[1]});
+    })
   }
 
   render() {
@@ -110,7 +138,7 @@ class Card extends Component {
                       <li className="list-group-item">
                         <p>{post.url}</p>
                       </li>
-                      <li key={index} className="list-group-item py-2">
+                      <li key={`li-${index}`} className="list-group-item py-2">
                         <small className="float-left mt-1 text-muted">
                           TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
                         </small>
@@ -134,6 +162,16 @@ class Card extends Component {
                             className="btn btn-link btn-sm float-right pt-0"
                             placeholder="Tip 0.1 Ether?"
                         />
+                      </li>
+                      <li key={`open-modal-button-${index}`} className="list-group-item py-2">
+                        <button
+                          id={`button-comments${index}`}
+                          className="btn btn-link btn-sm float-left pt-0"
+                          name={post.pid}
+                          onClick={() => this.openCommentsModal(post)}
+                        >
+                          Comments
+                        </button>
                         {(this.state.followingIdStringList > 0 && this.state.followingIdStringList.indexOf(post.authorId.toString()) > -1) ? 
                          (<button
                           className="btn btn-link btn-sm float-right pt-0"
@@ -164,6 +202,58 @@ class Card extends Component {
                 )
               })}
             </div>
+
+            <Modal
+              show={this.state.showCommentsModal}
+              onHide={this.closeCommentsModal}
+              backdrop="static"
+              keyboard={false}
+              size={'xl'}
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Want to add a new comment...?</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <ListGroup variant="flush">
+                    {/* <p>&nbsp;Scroll down to see and add a comment:</p> */}
+                    {this.state.activePostComments.map((obj, index) => (
+                      <div className="form-group mr-sm-2">
+                        <textarea rows={2} cols={4} disabled={true} key={`comment-${index}`}>
+                          {obj.comment}
+                        </textarea>
+                      </div>
+                    )) }
+                    <form onSubmit={(event) => {
+                      event.preventDefault();
+                      this.createComment(this.state.activePostData.pid, this.postComment.value);
+                    }}>
+                    <div className="form-group mr-sm-2">
+                      <textarea
+                        id="postComment"
+                        name="postComments"
+                        type="text"
+                        ref={(input) => { this.postComment = input }}
+                        className="form-control"
+                        rows={2}
+                        cols={40}
+                        maxLength={240}
+                        placeholder="What's on your mind?"
+                        required>
+
+                        </textarea>
+                    </div>
+                    <button type="submit" className="btn btn-primary btn-block">Submit</button>
+                  </form>
+                  <p>&nbsp;</p>
+                </ListGroup>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={this.closeCommentsModal}>
+                  Close
+                </Button>
+                {/* <Button variant="primary">Understood</Button> */}
+              </Modal.Footer>
+            </Modal>            
           </main>
         </div>
       </div>
