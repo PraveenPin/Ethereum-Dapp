@@ -77,7 +77,7 @@ class App extends Component {
       this.setState({ socialNetwork: socialNetwork });
      //await socialNetwork.methods.postCount(); this just returns the postCount method
       // var g = await socialNetwork.methods.autoCreateUser("PraveenPin").estimateGas({from:this.state.account});
-      const user = await socialNetwork.methods.addressToUid(this.state.account).call();
+      const user = await socialNetwork.methods.getUserIdFromAddress(this.state.account).call();
       console.log("User Id:", web3.utils.hexToNumber(user));
       if(!(web3.utils.hexToNumber(user) > 0)){
         socialNetwork.methods.autoCreateUser("PraveePin").send({from: this.state.account});
@@ -126,7 +126,7 @@ class App extends Component {
     //send methods writes data on blockchain, costs gas
     this.setState({ postCount });
     for(var i = 1; i <= postCount; i++){
-      let post = await this.state.socialNetwork.methods.posts(i).call();
+      let post = await this.state.socialNetwork.methods.getPostFromPostId(i).call();
       this.setState({ isLoading: false, allPosts: [...this.state.allPosts, post ]});
     }
     this.setState({ isLoading: false });

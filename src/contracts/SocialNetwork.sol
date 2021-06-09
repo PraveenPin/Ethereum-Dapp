@@ -6,10 +6,10 @@ contract SocialNetwork is owned{
     /*Add code */
     string public networkName; /* State variable -> this value gets stored on block chain*/
     // we cannot know the length of any map and cannot iterate over it, we can only fetch individually
-    mapping(uint => Post) public posts;/* Key Value Store, gets written to block chain itself */
-    mapping(uint => User) public users;
-    mapping(address => uint) public addressToUid;
-    mapping(uint => mapping(uint => Comment)) public comments;
+    mapping(uint => Post) posts;/* Key Value Store, gets written to block chain itself */
+    mapping(uint => User) users;
+    mapping(address => uint) addressToUid;
+    mapping(uint => mapping(uint => Comment)) comments;
 
     uint public postCount = 0;
     uint16 public userCount = 0;
