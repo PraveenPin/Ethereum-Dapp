@@ -21,8 +21,8 @@ Plan:
     a. Profile - author id,name,followers count,following count, my posts, total tip obtained, total tip donated - done
     1. followers authors list with (name,id, address, posts ), following authors list (name,id, address, posts ) - done
     b. Enter arbitrary tip amount - form with text box, submit, send tip, emit event - done
-    c. Comments -> dynamic array - sender, comment - string 
-                                 - pop on click on a sender id, follow, report
+    c. Comments -> dynamic array - sender, comment - string, emoji support - done
+                                 - pop on click on a sender id, follow, report - done
     d. tags for each post
 2. Feed to show posts of the followed - following list for each user/author/tipper - using mapping - done
 C. work with events, logs - 
@@ -31,3 +31,4 @@ C. work with events, logs -
 4. Explore posts, with tags - search bar with tags, followers , all posts
 5. Current currency exchange rate -
 6. Sign in screen, ask user name  -
+7. Getters, Setters for maps in contract -

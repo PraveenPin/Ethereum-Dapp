@@ -1,1 +1,8 @@
 /* Styles go here */
+.react-emoji-picker--container{
+    position: unset;
+}
+
+.react-emoji-picker--wrapper{
+    width: 360px !important;
+}

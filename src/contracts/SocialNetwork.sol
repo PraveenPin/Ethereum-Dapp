@@ -55,6 +55,15 @@ contract SocialNetwork is owned{
     event AutoCreateUser(address indexed sender, string message);
     event FollowOrUnFollowUser(address indexed sender, uint senderId, uint author, string message, uint count);
 
+    function getUserIdFromAddress(address _userAddress) public checkAddress view returns (uint){
+        return addressToUid[_userAddress];
+    }
+
+    function getPostFromPostId(uint _postId) public view returns (Post memory){
+        require(_postId > 0 && _postId <= postCount);
+        return posts[_postId];
+    }
+
     function autoCreateUser(string memory _uname) public {        
         require(bytes(_uname).length > 0);
         userCount++;
@@ -210,27 +219,14 @@ contract SocialNetwork is owned{
         emit CommentCreated(_pid, commentsCount, _comment, msg.sender, _user.name);
     }
 
-    function deleteComment(uint _pid, uint _cid) public {
-        require(_pid > 0 && _pid <= postCount);
-        Post memory _post = posts[_pid];
-        uint commentsCount = _post.commentsCount;
-        require(_cid > 0 && _cid <= commentsCount);
-        Comment memory _comment = comments[_pid][_cid];
-        delete comments[_pid][_cid];
-        commentsCount--;
-        posts[_pid].commentsCount = commentsCount;
-        emit CommentDeleted(_pid, _cid, _comment.comment, _comment.author, _comment.authorName);
-
-    }
-
     function fetchAllComments(uint _postId) public view returns (Comment[] memory){
         require(_postId > 0 && _postId <= postCount);
         Post memory _post = posts[_postId];
         uint commentsCount = _post.commentsCount;
         Comment[] memory postComments = new Comment[](commentsCount);
-
+        uint counter = 0;
         for(uint i=1; i<= commentsCount; i++){
-            postComments[i-1] = comments[_postId][i];
+            postComments[counter++] = comments[_postId][i];
         }
         return postComments;
     }

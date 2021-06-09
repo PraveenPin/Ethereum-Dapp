@@ -72,7 +72,8 @@ class App extends Component {
     const networkId = await web3.eth.net.getId();
     const networkData = SocialNetwork.networks[networkId];
     if(networkData){
-      const socialNetwork = web3.eth.Contract(SocialNetwork.abi, networkData.address);
+      //bad to override transactionConfirmationBlocks' value, overridden here for test environment
+      const socialNetwork = web3.eth.Contract(SocialNetwork.abi, networkData.address, {transactionConfirmationBlocks: 1});
       this.setState({ socialNetwork: socialNetwork });
      //await socialNetwork.methods.postCount(); this just returns the postCount method
       // var g = await socialNetwork.methods.autoCreateUser("PraveenPin").estimateGas({from:this.state.account});

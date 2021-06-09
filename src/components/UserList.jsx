@@ -166,7 +166,7 @@ class UserList extends Component {
                           alt={`identicon-${index}`}
                           src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                         />
-                        <small className="text-muted">{post.author}:{window.web3.utils.hexToNumber(post.authorId)}</small>
+                        <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
                       </div>
                       <ul id="postList" className="list-group list-group-flush">
                         <li className="list-group-item">

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {Button, Modal, ListGroup} from 'react-bootstrap';
 import Identicon from 'identicon.js';
+import Comment from './Comment';
+import InputEmoji from "react-input-emoji";
 
 class Card extends Component {
 
@@ -15,8 +17,11 @@ class Card extends Component {
       followingIdStringList: [],
       showCommentsModal: false,
       activePostData: null,
-      activePostComments: []
+      activePostComments: [],
+      isLoadingCommentsBox: true
     }
+
+    this.createComment = this.createComment.bind(this);
   }
 
   componentDidMount(){
@@ -72,19 +77,19 @@ class Card extends Component {
     this.setState({ showCommentsModal: false, activePostData: null, activePostComments: [] });
   }
 
-  createComment = (postId, comment) => {
-    this.props.socialNetwork.methods.createComment(postId, comment).send({ from: this.props.account })
+  async createComment(postId, comment){
+    await this.props.socialNetwork.methods.createComment(postId, comment).send({ from: this.props.account })
     .once('receipt', (receipt) => {
-      console.log("receipt",receipt);
+      this.fetchAllComments();
     });
-    this.fetchAllComments();
   }
 
   fetchAllComments = () => {
+    this.setState({ isLoadingCommentsBox : true });
     this.props.socialNetwork.methods.fetchAllComments(this.state.activePostData.pid).call({ from: this.props.account })
     .then((result) => {
-      console.log("Comment list", result[1]);
-      this.setState({ activePostComments : result[1]});
+      console.log("Comment list", result);
+      this.setState({ isLoadingCommentsBox: false, activePostComments : result});
     })
   }
 
@@ -129,7 +134,7 @@ class Card extends Component {
                         alt={`identicon-${index}`}
                         src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                       />
-                      <small className="text-muted">{post.author}:{window.web3.utils.hexToNumber(post.authorId)}</small>
+                      <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
                     </div>
                     <ul id="postList" className="list-group list-group-flush">
                       <li className="list-group-item">
@@ -215,36 +220,29 @@ class Card extends Component {
               </Modal.Header>
               <Modal.Body>
                 <ListGroup variant="flush">
-                    {/* <p>&nbsp;Scroll down to see and add a comment:</p> */}
-                    {this.state.activePostComments.map((obj, index) => (
-                      <div className="form-group mr-sm-2">
-                        <textarea rows={2} cols={4} disabled={true} key={`comment-${index}`}>
-                          {obj.comment}
-                        </textarea>
-                      </div>
-                    )) }
-                    <form onSubmit={(event) => {
-                      event.preventDefault();
-                      this.createComment(this.state.activePostData.pid, this.postComment.value);
-                    }}>
-                    <div className="form-group mr-sm-2">
-                      <textarea
-                        id="postComment"
-                        name="postComments"
-                        type="text"
-                        ref={(input) => { this.postComment = input }}
-                        className="form-control"
-                        rows={2}
-                        cols={40}
-                        maxLength={240}
-                        placeholder="What's on your mind?"
-                        required>
-
-                        </textarea>
-                    </div>
-                    <button type="submit" className="btn btn-primary btn-block">Submit</button>
-                  </form>
-                  <p>&nbsp;</p>
+                    {this.state.isLoadingCommentsBox ? "Comments are loading ...." : 
+                    (<div>
+                          {this.state.activePostComments.map((obj, index) => 
+                          (<Comment
+                            index={index}
+                            commentData={obj} 
+                            account={this.props.account}
+                            socialNetwork={this.props.socialNetwork}
+                            postAuthor={this.state.activePostData.author}
+                            followingIdStringList={this.state.followingIdStringList}
+                            triggerFetchAllComments={this.fetchAllComments}
+                          />))}
+                        <div className="form-group mr-sm-2">                                                     
+                          <InputEmoji
+                            value={"1222222222222222222222"}
+                            onChange={(value) => console.log("Emoji",value)}
+                            onClick={(props) => console.log(props)}
+                            cleanOnEnter
+                            onEnter={(value) => this.createComment(this.state.activePostData.pid, value)}
+                            placeholder="Type a message"
+                          />
+                        </div>
+                    </div>)}
                 </ListGroup>
               </Modal.Body>
               <Modal.Footer>
