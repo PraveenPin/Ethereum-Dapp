@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Button, Modal, ListGroup} from 'react-bootstrap';
+import { Button, Modal, ListGroup } from 'react-bootstrap';
 import Identicon from 'identicon.js';
 import Comment from './Comment';
 import InputEmoji from "react-input-emoji";
@@ -99,30 +99,52 @@ class Card extends Component {
         <div className="row">
           <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '500px' }}>
             <div className="content mr-auto ml-auto">
-              <p>&nbsp;Explore:</p>
-                <form onSubmit={(event) => {
-                  event.preventDefault();
-                  this.props.createPost(this.postContent.value,this.postUrl.value);
-                }}>
-                <div className="form-group mr-sm-2">
-                  <input
-                    id="postContent"
-                    type="text"
-                    ref={(input) => { this.postContent = input }}
-                    className="form-control"
-                    placeholder="What's on your mind?"
-                    required /> 
-                  <input
-                    id="postUrl"
-                    type="text"
-                    ref={(input) => { this.postUrl = input }}
-                    className="form-control"
-                    placeholder="Attach some Urls?"
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary btn-block">Share</button>
-              </form>
-              <p>&nbsp;</p>
+              {this.props.heading === 'Explore' ? 
+                  (<div>
+                      <p>&nbsp;Explore:</p>
+                      <form onSubmit={(event) => {
+                        event.preventDefault();
+                        this.props.createPost(this.postContent.value,this.postUrl.value);
+                      }}>
+                      <div className="form-group mr-sm-2">
+                        <input
+                          id="postContent"
+                          type="text"
+                          ref={(input) => { this.postContent = input }}
+                          className="form-control"
+                          placeholder="What's on your mind?"
+                          required /> 
+                        <input
+                          id="postUrl"
+                          type="text"
+                          ref={(input) => { this.postUrl = input }}
+                          className="form-control"
+                          placeholder="Attach some Urls?"
+                          />
+                      </div>
+                      <button type="submit" className="btn btn-primary btn-block">Share</button>
+                    </form>
+                    <p>&nbsp;</p>
+                  </div>) : 
+                  (<div>
+                      <h4>&nbsp;Search: </h4>
+                      <form onSubmit={(event) => {
+                        event.preventDefault();
+                        this.props.fetchSearchKeyPosts(this.searchKey.value);
+                      }}>
+                      <div className="form-group mr-sm-2">
+                        <input
+                          id="searchKey"
+                          type="text"
+                          ref={(input) => { this.searchKey = input }}
+                          className="form-control"
+                          placeholder="Type in any key?"
+                          required />
+                      </div>
+                      <button type="submit" className="btn btn-primary btn-block">Search</button>
+                    </form>
+                    <p>&nbsp;</p>
+                  </div>)}
               {this.props.posts.map((post, index) => {
                 return(
                   <div className="card mb-4" key={index} >

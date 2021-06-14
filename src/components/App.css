@@ -6,3 +6,7 @@
 .react-emoji-picker--wrapper{
     width: 360px !important;
 }
+
+.nav{
+    height: 42px;
+}

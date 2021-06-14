@@ -6,6 +6,7 @@ import SocialNetwork from '../abis/SocialNetwork.json';
 import NavBar from './NavBar.jsx';
 import Card from './Card.jsx';
 import Profile from './Profile.jsx';
+import { Tabs, Tab } from 'react-bootstrap';
 
 class App extends Component {
 
@@ -120,12 +121,6 @@ class App extends Component {
   }
 
   async explorePosts(){
-    this.state.socialNetwork.methods.getPostsFromTag("post").call()
-    .then((result) => {
-      console.log("TAGS",result);
-      this.setState({ postSearchResult: result });
-    })
-
     const postCount = await this.state.socialNetwork.methods.postCount().call(); // this calls the method and returns the postCount
     //call methods just read data from blockchain, costs no gas
     //send methods writes data on blockchain, costs gas
@@ -162,6 +157,14 @@ class App extends Component {
   //     this.setState({ followerPosts: [...this.state.followerPosts, posts[1]]});
   //   }
   // }
+
+  fetchSearchKeyPosts = (searchKey) => {
+    this.state.socialNetwork.methods.getPostsFromTag(searchKey).call()
+    .then((result) => {
+      console.log("TAGS",result);
+      this.setState({ postSearchResult: result });
+    })
+  }
 
   createUser = (userName) => {
     this.state.socialNetwork.methods.autoCreateUser(userName).send({from: this.state.account})
@@ -213,13 +216,28 @@ class App extends Component {
                       )}
                   </div>
                   <div style={{ width: '70%' }}>
-                    <Card posts={this.state.allPosts} 
-                      tipPost={this.tipAPost} 
-                      createPost={this.createAPost}
-                      socialNetwork={this.state.socialNetwork}
-                      account={this.state.account}
-                    />
+                    <Tabs defaultActiveKey="explore" id="uncontrolled-tab-example" style={{ width: '70%' }}>
+                      <Tab eventKey="explore" title="Explore">
+                          <Card posts={this.state.allPosts} 
+                            heading={"Explore"}
+                            tipPost={this.tipAPost} 
+                            createPost={this.createAPost}
+                            socialNetwork={this.state.socialNetwork}
+                            account={this.state.account}
+                          />
+                      </Tab>
+                      <Tab eventKey="search" title="Search">
+                          <Card posts={this.state.postSearchResult}  
+                            heading={"Search"}
+                            tipPost={this.tipAPost}
+                            socialNetwork={this.state.socialNetwork}
+                            account={this.state.account}
+                            fetchSearchKeyPosts={this.fetchSearchKeyPosts}
+                          />
+                      </Tab>
+                    </Tabs>
                   </div>
+               
                 </div>}
           </div>)
           }
