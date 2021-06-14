@@ -1,15 +1,21 @@
 pragma solidity ^0.8.0;
 
 import './owned.sol';
+import "./StringsLib.sol";
+pragma abicoder v2;
 
 contract SocialNetwork is owned{
     /*Add code */
+    using strings for *;
+
     string public networkName; /* State variable -> this value gets stored on block chain*/
     // we cannot know the length of any map and cannot iterate over it, we can only fetch individually
     mapping(uint => Post) posts;/* Key Value Store, gets written to block chain itself */
     mapping(uint => User) users;
     mapping(address => uint) addressToUid;
     mapping(uint => mapping(uint => Comment)) comments;
+    mapping(string => uint[]) postsFromTags;
+    mapping(uint256 => bool) helperMap;
 
     uint public postCount = 0;
     uint16 public userCount = 0;
@@ -47,7 +53,7 @@ contract SocialNetwork is owned{
         string authorName;
     }
 
-    constructor () {
+    constructor () public {
         networkName = "ETH - SocialNetwork";
     }
 
@@ -179,10 +185,10 @@ contract SocialNetwork is owned{
         posts[postCount] = Post(postCount, _content, "https://github.com/PraveenPin/Simple-Social-Network", 0, payable(msg.sender), userId, users[userId].name, 0); /* Instantiates Post, adds it into map */        
         //adding the post id to the user
         users[userId].myPostIds[postCount] = true;
-
         //Trigger event from solidity smart contracts
         //these posts can be open for subscription by consumers
-        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender, userId, users[userId].name);
+        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender, userId, users[userId].name);        
+        createTag(_content, postCount);
     }
 
     event PostTipped(uint pid, uint tipAmount, address author);
@@ -229,6 +235,67 @@ contract SocialNetwork is owned{
             postComments[counter++] = comments[_postId][i];
         }
         return postComments;
+    }
+
+    //event for tag creation
+    event PostTagsCreated(string[] tags, uint postId);
+    event AllPostsOfATag(string tag, Post[] posts);
+    event emitWord(string tag);
+
+    function createTag(string memory _content, uint _postId) public {       
+        
+        strings.slice memory s  = _content.toSlice();
+        strings.slice memory delim = " ".toSlice();
+        string[] memory parts = new string[](s.count(delim) + 1);
+        for(uint i = 0; i < parts.length; i++) {
+            parts[i] = s.split(delim).toString();
+        }
+
+        for(uint i = 0; i<parts.length;i++){
+            string memory tag = parts[i];
+            uint[] storage postIds = postsFromTags[tag];
+            postIds.push(_postId);
+            postsFromTags[tag] = postIds;
+            // bool found = false;
+            // for(uint j=0; j<postIds.length; i++){
+            //     if(!found && postIds[j] == _postId){
+            //         found = true;
+            //         break;
+            //     }
+            // }
+            // if(!found){
+            // }
+        }
+
+
+        emit PostTagsCreated(parts, _postId);
+    }
+
+    function checkEmptyCharacter(bytes1 _char) public pure returns (bool){
+        if(_char == 0x20){
+            return true;
+        }
+        return false;
+    }
+
+    function getPostsFromTag(string memory tag) public returns (Post[] memory){
+        uint[] memory postIds = postsFromTags[tag];
+        uint counter = 0;
+        Post[] memory postsOfTag = new Post[](postIds.length);
+        for(uint i=0;i< postIds.length;i++){
+            if(!helperMap[postIds[i]]){
+                counter++;
+                helperMap[postIds[i]] = true;
+                postsOfTag[i] = posts[postIds[i]];
+            }
+        }
+
+        //nullify helper map
+        for(uint i=0;i< postIds.length;i++){
+            helperMap[postIds[i]] = false;
+        }
+        emit AllPostsOfATag(tag, postsOfTag);
+        return postsOfTag;
     }
 
     //self destruct event 

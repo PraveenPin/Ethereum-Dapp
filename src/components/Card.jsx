@@ -234,9 +234,7 @@ class Card extends Component {
                           />))}
                         <div className="form-group mr-sm-2">                                                     
                           <InputEmoji
-                            value={"1222222222222222222222"}
-                            onChange={(value) => console.log("Emoji",value)}
-                            onClick={(props) => console.log(props)}
+                            // value={}
                             cleanOnEnter
                             onEnter={(value) => this.createComment(this.state.activePostData.pid, value)}
                             placeholder="Type a message"

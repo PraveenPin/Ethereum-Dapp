@@ -12,6 +12,7 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
+      firstTimeLogin: 0,
       account: '',
       socialNetwork: null,
       postCount: 0,
@@ -19,10 +20,7 @@ class App extends Component {
       myPosts: [],
       isLoading: true,
       userData: null,
-      // myFollowingIds: [],
-      // myFollowerIds: [],
-      // followingPosts: [],
-      // followerPosts: []
+      postSearchResult: []
 
     }
     this.explorePosts = this.explorePosts.bind(this);
@@ -78,9 +76,8 @@ class App extends Component {
      //await socialNetwork.methods.postCount(); this just returns the postCount method
       // var g = await socialNetwork.methods.autoCreateUser("PraveenPin").estimateGas({from:this.state.account});
       const user = await socialNetwork.methods.getUserIdFromAddress(this.state.account).call();
-      console.log("User Id:", web3.utils.hexToNumber(user));
       if(!(web3.utils.hexToNumber(user) > 0)){
-        socialNetwork.methods.autoCreateUser("PraveePin").send({from: this.state.account});
+        this.setState({ firstTimeLogin: -1 });
       }
       else{
         const userInfo = await socialNetwork.methods.getUserInfo().call({from: this.state.account});
@@ -105,6 +102,8 @@ class App extends Component {
 
  createAPost = (content, url) => {
     this.setState({ isLoading: true });
+    const gas = this.state.socialNetwork.methods.createPost(content, url).estimateGas({ from : this.state.account });
+    console.log("jhghjg",gas);
     this.state.socialNetwork.methods.createPost(content, url).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       console.log("receipt",receipt);
@@ -121,6 +120,12 @@ class App extends Component {
   }
 
   async explorePosts(){
+    this.state.socialNetwork.methods.getPostsFromTag("post").call()
+    .then((result) => {
+      console.log("TAGS",result);
+      this.setState({ postSearchResult: result });
+    })
+
     const postCount = await this.state.socialNetwork.methods.postCount().call(); // this calls the method and returns the postCount
     //call methods just read data from blockchain, costs no gas
     //send methods writes data on blockchain, costs gas
@@ -158,35 +163,67 @@ class App extends Component {
   //   }
   // }
 
+  createUser = (userName) => {
+    this.state.socialNetwork.methods.autoCreateUser(userName).send({from: this.state.account})
+    .once('receipt', (receipt) => {
+      this.setState({ firstTimeLogin: 0 });
+    });
+  }
+
   render() {
     return (
-      <div>
-        <NavBar account = {this.state.account}/>
-        {this.state.isLoading ? <div id="loader" className="text-center"> <p style={{ marginTop: '65px'}}>Loading......</p></div> : 
-                             <div style={{ display: 'flex', flexWrap: 'wrap', 
-                                   marginTop: '3rem' , marginLeft: '2rem',height: '600px', scroll: 'auto'}}>
-                                <div style={{ width: '30%' }}>
-                                    {!!this.state.userData && (
-                                        <Profile
-                                          userData={this.state.userData}
-                                          myPosts={this.state.myPosts}
-                                          socialNetwork={this.state.socialNetwork}
-                                          account={this.state.account} 
-                                          tipPost={this.tipAPost}
-                                        />
-                                    )}
-                                </div>
-                                <div style={{ width: '70%' }}>
-                                  <Card posts={this.state.allPosts} 
-                                    tipPost={this.tipAPost} 
-                                    createPost={this.createAPost}
-                                    socialNetwork={this.state.socialNetwork}
-                                    account={this.state.account}
-                                  />
-                                </div>
-                             </div>
-        }
-      </div>
+        <div>
+          {this.state.firstTimeLogin === -1 ? 
+          (<div>
+              <form onSubmit={(event) => {
+                    event.preventDefault();
+                  this.createUser(this.userName.value);
+                }}>
+                <div className="form-group mr-sm-2">
+                  <input
+                    id="userName"
+                    type="text"
+                    ref={(input) => { this.userName = input }}
+                    className="form-control"
+                    placeholder="What's on your mind?"
+                    required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-block">Create An Account</button>
+              </form>
+              <p>&nbsp;</p>
+          </div>) : 
+          this.state.firstTimeLogin === -1 ? (<div>
+            Creating an account .............
+          </div>) : 
+          (<div>        
+            <NavBar account = {this.state.account}/>
+            {this.state.isLoading ? 
+              <div id="loader" className="text-center"> <p style={{ marginTop: '65px'}}>Loading......</p></div> : 
+                <div style={{ display: 'flex', flexWrap: 'wrap', 
+                      marginTop: '3rem' , marginLeft: '2rem',height: '600px', scroll: 'auto'}}>
+                  <div style={{ width: '30%' }}>
+                      {!!this.state.userData && (
+                          <Profile
+                            userData={this.state.userData}
+                            myPosts={this.state.myPosts}
+                            socialNetwork={this.state.socialNetwork}
+                            account={this.state.account} 
+                            tipPost={this.tipAPost}
+                          />
+                      )}
+                  </div>
+                  <div style={{ width: '70%' }}>
+                    <Card posts={this.state.allPosts} 
+                      tipPost={this.tipAPost} 
+                      createPost={this.createAPost}
+                      socialNetwork={this.state.socialNetwork}
+                      account={this.state.account}
+                    />
+                  </div>
+                </div>}
+          </div>)
+          }
+        </div>
     );
   }
 }

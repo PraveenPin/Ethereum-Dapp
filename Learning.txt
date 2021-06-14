@@ -29,6 +29,6 @@ C. work with events, logs -
 3. Profile with pic, name - done
     b. transaction history, Logs
 4. Explore posts, with tags - search bar with tags, followers , all posts
-5. Current currency exchange rate -
-6. Sign in screen, ask user name  -
-7. Getters, Setters for maps in contract -
+5. Current currency exchange rate, loader -
+6. Sign in screen, ask user name - done
+7. Getters, Setters for maps in contract - done
