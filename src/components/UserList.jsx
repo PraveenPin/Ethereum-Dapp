@@ -12,7 +12,9 @@ class UserList extends Component {
       isLoading: true,
       isLoadingProfileModal: true,
       idList: this.props.idList,
+      totalUsersInfo: [],
       usersInfo: [],
+      searchIsOn: false,
       viewingPosts: []
     }
     this.getUserData = this.getUserData.bind(this);
@@ -27,7 +29,7 @@ class UserList extends Component {
     this.setState({ isLoading: true });
     for(let i = 0; i<this.state.idList.length;i++){
       let userInfo = await this.props.socialNetwork.methods.getUserData(this.state.idList[i]).call({from: this.props.account});
-      this.setState({ usersInfo: [...this.state.usersInfo, userInfo]});
+      this.setState({ totalUsersInfo: [...this.state.totalUsersInfo, userInfo]});
     }
     this.setState({ isLoading: false });
   }
@@ -72,9 +74,26 @@ class UserList extends Component {
     //notification for following
   }  
 
+  filterNames = (searchIdName) => {
+    let usersInfo = [];
+    this.state.totalUsersInfo.map((userInfo,index) => {
+      if (userInfo[1].includes(searchIdName) || window.web3.utils.hexToNumberString(userInfo[0]).includes(searchIdName)){
+        usersInfo.push(userInfo);
+      }
+    });
+    this.setState({ searchIsOn: true, usersInfo: usersInfo });
+  }
+
+  clearSearchResults = () => {    
+    this.setState({ searchIsOn: false, usersInfo: [] });
+  }   
+
   render() {
     //remove this and place this call in onClick of ListGroupItem
-    console.log("Account:",this.props.followingIdStringList);
+
+    let iterablePosts = this.state.searchIsOn ? this.state.usersInfo : this.state.totalUsersInfo;
+    console.log("iterable posts:",iterablePosts);
+
    return (
       <div>
         <Button variant="primary" onClick={this.handleShow}>
@@ -89,12 +108,34 @@ class UserList extends Component {
           size={'xl'}
         >
           <Modal.Header closeButton>
-            <Modal.Title>{this.props.heading}</Modal.Title>
+            <Modal.Title>
+              <div style={{display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                  {this.props.heading}
+                <form style={{ width: '70%' }} onSubmit={(event) => {
+                      event.preventDefault();
+                    this.filterNames(this.searchIdName.value);
+                  }}>
+                  <div className="form-group mr-sm-2">
+                    <input
+                      id="searchIdName"
+                      type="text"
+                      ref={(input) => { this.searchIdName = input }}
+                      className="form-control"
+                      placeholder="Search for a id or name ?"
+                      required />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button style={{ width: '50%' }} type="submit" onClick={this.clearSearchResults} variant="primary">Search</Button>
+                    <Button type="reset" onClick={this.clearSearchResults} variant="danger">Clear Below Results</Button> 
+                  </div>
+                </form>
+            </div>
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <ListGroup variant="flush">
-              {this.state.isLoading ? "Loading ...." : this.state.usersInfo.length === 0 ? `${this.props.heading} No one` :
-              this.state.usersInfo.map((userData,index) => (
+              {this.state.isLoading ? "Loading ...." : iterablePosts.length === 0 ? `${this.props.heading} No one` :
+              iterablePosts.map((userData,index) => (
                 <ListGroup.Item key={`list-group-item-${index}`} onClick={() => console.log("Click")}
                   style={{ display: 'flex', justifyContent: 'space-around'}}>
                   <div>Id: {window.web3.utils.hexToNumber(userData[0])}</div>

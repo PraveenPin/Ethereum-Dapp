@@ -7,6 +7,7 @@ import NavBar from './NavBar.jsx';
 import Card from './Card.jsx';
 import Profile from './Profile.jsx';
 import { Tabs, Tab } from 'react-bootstrap';
+import Ticker from 'react-ticker';
 
 class App extends Component {
 
@@ -21,7 +22,8 @@ class App extends Component {
       myPosts: [],
       isLoading: true,
       userData: null,
-      postSearchResult: []
+      postSearchResult: [],
+      tickerData: []
 
     }
     this.explorePosts = this.explorePosts.bind(this);
@@ -95,6 +97,7 @@ class App extends Component {
       }      
       this.explorePosts();
       // this.fetchNetworkIds();
+      this.fetchTickerExchangeData();
     }
     else{
       window.alert("Social Network contract not deployed to detected network");
@@ -173,7 +176,18 @@ class App extends Component {
     });
   }
 
+  fetchTickerExchangeData = () => {
+    fetch("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=BTC,USD,EUR,INR")
+    .then(res => res.json())
+    .then( result => {
+      console.log("Curr Exchange:", result);
+      const arr = [result.BTC + " BTC", result.USD + " USD", result.INR + " INR", result.EUR + " EUR"];
+      this.setState({ tickerData: arr })
+    })
+  }
+
   render() {
+    console.log("Ticker data",this.state.tickerData, this.state.tickerData[0]);
     return (
         <div>
           {this.state.firstTimeLogin === -1 ? 
@@ -200,6 +214,17 @@ class App extends Component {
           </div>) : 
           (<div>        
             <NavBar account = {this.state.account}/>
+            
+            <div>
+              {this.state.tickerData.length !== 0 && // 👈 null and undefined check
+              (<Ticker offset={15}>
+                  {({ index }) => (
+                      <>
+                          <h1>{this.state.tickerData[index % (this.state.tickerData.length)]}&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+                      </>
+                  )}
+              </Ticker>)}
+            </div>
             {this.state.isLoading ? 
               <div id="loader" className="text-center"> <p style={{ marginTop: '65px'}}>Loading......</p></div> : 
                 <div style={{ display: 'flex', flexWrap: 'wrap', 

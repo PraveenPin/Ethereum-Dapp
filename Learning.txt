@@ -23,12 +23,11 @@ Plan:
     b. Enter arbitrary tip amount - form with text box, submit, send tip, emit event - done
     c. Comments -> dynamic array - sender, comment - string, emoji support - done
                                  - pop on click on a sender id, follow, report - done
-    d. tags for each post
+    d. tags for each post - done
 2. Feed to show posts of the followed - following list for each user/author/tipper - using mapping - done
-C. work with events, logs - 
 3. Profile with pic, name - done
     b. transaction history, Logs
-4. Explore posts, with tags - search bar with tags, followers , all posts
-5. Current currency exchange rate, loader -
+4. Explore all posts, with tags - search bar with tags, followers - one
+5. Current currency exchange rate, loader - done
 6. Sign in screen, ask user name - done
 7. Getters, Setters for maps in contract - done

@@ -10,3 +10,15 @@
 .nav{
     height: 42px;
 }
+
+.modal-title{
+    width: 100%;
+}
+
+.ticker{
+    top: 48px !important;
+}
+
+div.ticker__element > h1{
+    font-size: 1.5rem;
+}
