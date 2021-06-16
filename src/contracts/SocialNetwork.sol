@@ -42,6 +42,7 @@ contract SocialNetwork is owned{
         uint authorId;
         string authorName;
         uint commentsCount;
+        string picIpfsHash;
     }
 
     struct Comment{
@@ -173,21 +174,21 @@ contract SocialNetwork is owned{
         return (_user.id, _user.name, _user.followersCount, _user.followingCount, _user.tipObtained, _user.tipDonated);
     }
 
-    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author, uint authorId, string authorName);
+    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author, uint authorId, string authorName, string imageHash);
 
-    function createPost(string memory _content, string memory _url) public{ 
+    function createPost(string memory _content, string memory _url, string memory _imageHash ) public{ 
         //require valid content
         require(bytes(_content).length > 0); //if false it stops execution and gas used will be refunded back to caller, else continues execution
         
         /* Here _content is a local var and underscore is just a conventions for local vars*/
         postCount++;        
         uint userId = addressToUid[msg.sender];
-        posts[postCount] = Post(postCount, _content, "https://github.com/PraveenPin/Simple-Social-Network", 0, payable(msg.sender), userId, users[userId].name, 0); /* Instantiates Post, adds it into map */        
+        posts[postCount] = Post(postCount, _content, "https://github.com/PraveenPin/Simple-Social-Network", 0, payable(msg.sender), userId, users[userId].name, 0, _imageHash); /* Instantiates Post, adds it into map */        
         //adding the post id to the user
         users[userId].myPostIds[postCount] = true;
         //Trigger event from solidity smart contracts
         //these posts can be open for subscription by consumers
-        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender, userId, users[userId].name);        
+        emit PostCreated(msg.sender,postCount, _content, _url, 0, msg.sender, userId, users[userId].name, _imageHash);        
         createTag(_content, postCount);
     }
 

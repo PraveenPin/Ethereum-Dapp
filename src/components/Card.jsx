@@ -3,6 +3,7 @@ import { Button, Modal, ListGroup } from 'react-bootstrap';
 import Identicon from 'identicon.js';
 import Comment from './Comment';
 import InputEmoji from "react-input-emoji";
+import ipfs from './ipfs';
 
 class Card extends Component {
 
@@ -18,7 +19,9 @@ class Card extends Component {
       showCommentsModal: false,
       activePostData: null,
       activePostComments: [],
-      isLoadingCommentsBox: true
+      isLoadingCommentsBox: true,
+      imagebuffer: null,
+      imageIpfsHash: null
     }
 
     this.createComment = this.createComment.bind(this);
@@ -93,6 +96,35 @@ class Card extends Component {
     })
   }
 
+  onFileChange = (event) => {
+    event.preventDefault();
+    console.log("cap file:", this.postImage.value, this.postImage.files[0]);
+    const file = this.postImage.files[0];
+    const reader = new window.FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onloadend = () => {
+      this.setState({ imageBuffer: Buffer(reader.result) });
+    }
+  }
+
+  onPostFormSubmit = (event) => {
+    event.preventDefault();
+    if(!!this.state.imageBuffer){
+      console.log("uploading image....", this.state.imageBuffer);
+      ipfs.add(this.state.imageBuffer)
+      .then(result => {
+        console.log("Upload successfull. Sending a request to create a post",result.path);
+        this.setState({ imageIpfsHash: result.path }, () => this.props.createPost(this.postContent.value,this.postUrl.value, result.path));    
+      })
+      .catch(error => console.error(error));
+    }
+    else{
+      console.log("Sending a request to create a post with no image");
+      this.props.createPost(this.postContent.value,this.postUrl.value, ""); 
+    }
+
+  }
+
   render() {
     return (
       <div>
@@ -102,10 +134,7 @@ class Card extends Component {
               {this.props.heading === 'Explore' ? 
                   (<div>
                       <p>&nbsp;Explore:</p>
-                      <form onSubmit={(event) => {
-                        event.preventDefault();
-                        this.props.createPost(this.postContent.value,this.postUrl.value);
-                      }}>
+                      <form onSubmit={this.onPostFormSubmit}>
                       <div className="form-group mr-sm-2">
                         <input
                           id="postContent"
@@ -120,7 +149,15 @@ class Card extends Component {
                           ref={(input) => { this.postUrl = input }}
                           className="form-control"
                           placeholder="Attach some Urls?"
-                          />
+                        />
+                        <input
+                          id="postImage"
+                          type="file"
+                          ref={(input) => { this.postImage = input }}
+                          onChange={this.onFileChange}  
+                          className="form-control"
+                          placeholder="Attach some Urls?"
+                        />
                       </div>
                       <button type="submit" className="btn btn-primary btn-block">Share</button>
                     </form>
@@ -165,6 +202,9 @@ class Card extends Component {
                       <li className="list-group-item">
                         <p>{post.url}</p>
                       </li>
+                      {!!post.picIpfsHash && (<li className="list-group-item">
+                        <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${post.picIpfsHash}`}></img>
+                      </li>)}
                       <li key={`li-${index}`} className="list-group-item py-2">
                         <small className="float-left mt-1 text-muted">
                           TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH

@@ -90,10 +90,7 @@ class UserList extends Component {
 
   render() {
     //remove this and place this call in onClick of ListGroupItem
-
     let iterablePosts = this.state.searchIsOn ? this.state.usersInfo : this.state.totalUsersInfo;
-    console.log("iterable posts:",iterablePosts);
-
    return (
       <div>
         <Button variant="primary" onClick={this.handleShow}>

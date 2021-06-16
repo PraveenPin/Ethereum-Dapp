@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from '../logo.png';
 import './App.css';
+import ipfs from './ipfs';
 import Web3 from 'web3';
 import SocialNetwork from '../abis/SocialNetwork.json';
 import NavBar from './NavBar.jsx';
@@ -104,11 +105,11 @@ class App extends Component {
     }
   }
 
- createAPost = (content, url) => {
+ createAPost = (content, url, imageHash) => {
     this.setState({ isLoading: true });
-    const gas = this.state.socialNetwork.methods.createPost(content, url).estimateGas({ from : this.state.account });
+    const gas = this.state.socialNetwork.methods.createPost(content, url, imageHash).estimateGas({ from : this.state.account });
     console.log("jhghjg",gas);
-    this.state.socialNetwork.methods.createPost(content, url).send({ from: this.state.account })
+    this.state.socialNetwork.methods.createPost(content, url, imageHash).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       console.log("receipt",receipt);
       this.setState({ isLoading: false, appple: 'apple' },() => console.log("C.",this.state));
@@ -118,7 +119,6 @@ class App extends Component {
 
   tipAPost= (id, tipAmount)=>{
     this.setState({ isLoading: true });
-    console.log("isLoading:",this.state);
     this.state.socialNetwork.methods.tipAPost(id).send({ from: this.state.account, value: tipAmount });
     this.setState({ isLoading: false });
   }
@@ -180,14 +180,12 @@ class App extends Component {
     fetch("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=BTC,USD,EUR,INR")
     .then(res => res.json())
     .then( result => {
-      console.log("Curr Exchange:", result);
       const arr = [result.BTC + " BTC", result.USD + " USD", result.INR + " INR", result.EUR + " EUR"];
       this.setState({ tickerData: arr })
     })
   }
 
   render() {
-    console.log("Ticker data",this.state.tickerData, this.state.tickerData[0]);
     return (
         <div>
           {this.state.firstTimeLogin === -1 ? 
