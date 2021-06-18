@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Button, Modal, ListGroup} from 'react-bootstrap';
 import Identicon from 'identicon.js';
+import { getIpfsHashFromBytes32 } from './utils';
 
 class UserList extends Component {
 
@@ -212,7 +213,10 @@ class UserList extends Component {
                         </li>
                         <li className="list-group-item">
                           <p>{post.url}</p>
-                        </li>
+                        </li>                        
+                        {!!post.picIpfsHash && (<li className="list-group-item">
+                          <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                        </li>)}
                         <li key={index} className="list-group-item py-2">
                           <small className="float-left mt-1 text-muted">
                             TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH

@@ -42,7 +42,7 @@ contract SocialNetwork is owned{
         uint authorId;
         string authorName;
         uint commentsCount;
-        string picIpfsHash;
+        bytes32 picIpfsHash;
     }
 
     struct Comment{
@@ -174,9 +174,9 @@ contract SocialNetwork is owned{
         return (_user.id, _user.name, _user.followersCount, _user.followingCount, _user.tipObtained, _user.tipDonated);
     }
 
-    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author, uint authorId, string authorName, string imageHash);
+    event PostCreated(address indexed id, uint pid, string content, string url, uint tipAmount, address author, uint authorId, string authorName, bytes32 imageHash);
 
-    function createPost(string memory _content, string memory _url, string memory _imageHash ) public{ 
+    function createPost(string memory _content, string memory _url, bytes32 _imageHash ) public{ 
         //require valid content
         require(bytes(_content).length > 0); //if false it stops execution and gas used will be refunded back to caller, else continues execution
         

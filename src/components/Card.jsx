@@ -4,6 +4,9 @@ import Identicon from 'identicon.js';
 import Comment from './Comment';
 import InputEmoji from "react-input-emoji";
 import ipfs from './ipfs';
+import { getBytes32FromIpfsHash, getIpfsHashFromBytes32 } from './utils';
+import { IconButton } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
 class Card extends Component {
 
@@ -113,8 +116,8 @@ class Card extends Component {
       console.log("uploading image....", this.state.imageBuffer);
       ipfs.add(this.state.imageBuffer)
       .then(result => {
-        console.log("Upload successfull. Sending a request to create a post",result.path);
-        this.setState({ imageIpfsHash: result.path }, () => this.props.createPost(this.postContent.value,this.postUrl.value, result.path));    
+        console.log("Upload successfull. Sending a request to create a post",getBytes32FromIpfsHash(result.path));
+        this.setState({ imageIpfsHash: result.path }, () => this.props.createPost(this.postContent.value,this.postUrl.value, getBytes32FromIpfsHash(result.path)));    
       })
       .catch(error => console.error(error));
     }
@@ -128,42 +131,48 @@ class Card extends Component {
   render() {
     return (
       <div>
-        <div className="row">
-          <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '500px' }}>
-            <div className="content mr-auto ml-auto">
+        <div className="rowWiseContainer">
               {this.props.heading === 'Explore' ? 
-                  (<div>
-                      <p>&nbsp;Explore:</p>
+                  (<div className="formContainer">
+                      <h4 style={{ marginTop: '24px'}}>&nbsp;Create and share a post:</h4>
                       <form onSubmit={this.onPostFormSubmit}>
                       <div className="form-group mr-sm-2">
                         <input
                           id="postContent"
                           type="text"
                           ref={(input) => { this.postContent = input }}
-                          className="form-control"
+                          className="form-control postContent"
                           placeholder="What's on your mind?"
                           required /> 
-                        <input
-                          id="postUrl"
-                          type="text"
-                          ref={(input) => { this.postUrl = input }}
-                          className="form-control"
-                          placeholder="Attach some Urls?"
-                        />
-                        <input
-                          id="postImage"
-                          type="file"
-                          ref={(input) => { this.postImage = input }}
-                          onChange={this.onFileChange}  
-                          className="form-control"
-                          placeholder="Attach some Urls?"
-                        />
+                        <div style={{ width: '100%'}}>
+                          <input
+                            id="postUrl"
+                            type="text"
+                            className="form-control postUrl"
+                            ref={(input) => { this.postUrl = input }}
+                            placeholder="Attach some Urls?"
+                          />
+                          <input accept="image/*"
+                                type="file" 
+                                style = {{ display: 'none' }}
+                                id="postImage"
+                                ref={(input) => { this.postImage = input }}
+                                onChange={this.onFileChange}  
+                                className="form-control"
+                          />
+                        </div>
+                        <label htmlFor="postImage" style={{ display: 'flex', flexWrap: 'wrap', height:"28px", margin: '10px 0px 0px 14px'}}>
+                        {!!this.state.imageBuffer ? <p className="UploadedMessage">Uploaded.. ✅</p> : <p className="UploadedMessage">Add an image</p> }                            
+                          <IconButton color="primary" component="span">
+                            <AddIcon />
+                          </IconButton>
+                        </label>            
                       </div>
                       <button type="submit" className="btn btn-primary btn-block">Share</button>
                     </form>
                     <p>&nbsp;</p>
                   </div>) : 
-                  (<div>
+                  (<div className="formContainer">
                       <h4>&nbsp;Search: </h4>
                       <form onSubmit={(event) => {
                         event.preventDefault();
@@ -182,92 +191,95 @@ class Card extends Component {
                     </form>
                     <p>&nbsp;</p>
                   </div>)}
-              {this.props.posts.map((post, index) => {
-                return(
-                  <div className="card mb-4" key={index} >
-                    <div className="card-header">
-                      <img
-                        className='mr-2'
-                        width='30'
-                        height='30'
-                        alt={`identicon-${index}`}
-                        src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
-                      />
-                      <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
-                    </div>
-                    <ul id="postList" className="list-group list-group-flush">
-                      <li className="list-group-item">
-                        <p>{post.content}</p>
-                      </li>
-                      <li className="list-group-item">
-                        <p>{post.url}</p>
-                      </li>
-                      {!!post.picIpfsHash && (<li className="list-group-item">
-                        <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${post.picIpfsHash}`}></img>
-                      </li>)}
-                      <li key={`li-${index}`} className="list-group-item py-2">
-                        <small className="float-left mt-1 text-muted">
-                          TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
-                        </small>
-                        <button
-                          id={`button-tipAmount${index}`}
-                          className="btn btn-link btn-sm float-right pt-0"
-                          name={post.pid}
-                          onClick={(event) => {
-                            if(document.getElementById(`tipAmount${index}`).value){
-                              let tipAmount = window.web3.utils.toWei(document.getElementById(`tipAmount${index}`).value.toString(), 'Ether');
-                              console.log(event.target.name, tipAmount);
-                              this.props.tipPost(event.target.name, tipAmount);
-                            }
-                          }}
-                        >
-                          TIP Ether
-                        </button>                        
-                        <input
-                            id={`tipAmount${index}`}
-                            type="number"
-                            className="btn btn-link btn-sm float-right pt-0"
-                            placeholder="Tip 0.1 Ether?"
-                        />
-                      </li>
-                      <li key={`open-modal-button-${index}`} className="list-group-item py-2">
-                        <button
-                          id={`button-comments${index}`}
-                          className="btn btn-link btn-sm float-left pt-0"
-                          name={post.pid}
-                          onClick={() => this.openCommentsModal(post)}
-                        >
-                          Comments
-                        </button>
-                        {(this.state.followingIdStringList > 0 && this.state.followingIdStringList.indexOf(post.authorId.toString()) > -1) ? 
-                         (<button
-                          className="btn btn-link btn-sm float-right pt-0"
-                          name={`follow-${post.pid}`}
-                          onClick={(event) => {
-                            console.log(event.target.name, "Following the author");
-                            this.unFollowAuthor(post.authorId);
-                          }}
-                          disabled={this.props.account.localeCompare(post.author) === 0}
-                        >
-                          Unfollow Author
-                        </button>)
-                         :                        
-                        (<button
-                          className="btn btn-link btn-sm float-right pt-0"
-                          name={`follow-${post.pid}`}
-                          onClick={(event) => {
-                            console.log(event.target.name, "Following the author");
-                            this.followAuthor(post.authorId);
-                          }}
-                          disabled={this.props.account.localeCompare(post.author) === 0}
-                        >
-                          Follow Author
-                        </button>)}
-                      </li>
-                    </ul>
+                  <div className="headerDivider"></div>
+                  <div className="postsContainer">
+                      {this.props.posts.map((post, index) => {
+                        return(
+                          <div className="card mb-4" key={index} >
+                            <div className="card-header">
+                              <img
+                                className='mr-2'
+                                width='30'
+                                height='30'
+                                alt={`identicon-${index}`}
+                                src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
+                              />
+                              <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
+                            </div>
+                            <ul id="postList" className="list-group list-group-flush">
+                              <li className="list-group-item">
+                                <p>{post.content}</p>
+                              </li>
+                              <li className="list-group-item">
+                                <p>{post.url}</p>
+                              </li>
+                              {!!post.picIpfsHash && (<li className="list-group-item">
+                                <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                              </li>)}
+                              <li key={`li-${index}`} className="list-group-item py-2">
+                                <small className="float-left mt-1 text-muted">
+                                  TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
+                                </small>
+                                <button
+                                  id={`button-tipAmount${index}`}
+                                  className="btn btn-link btn-sm float-right pt-0"
+                                  name={post.pid}
+                                  onClick={(event) => {
+                                    if(document.getElementById(`tipAmount${index}`).value){
+                                      let tipAmount = window.web3.utils.toWei(document.getElementById(`tipAmount${index}`).value.toString(), 'Ether');
+                                      console.log(event.target.name, tipAmount);
+                                      this.props.tipPost(event.target.name, tipAmount);
+                                    }
+                                  }}
+                                >
+                                  TIP Ether
+                                </button>                        
+                                <input
+                                    id={`tipAmount${index}`}
+                                    type="number"
+                                    className="btn btn-link btn-sm float-right pt-0"
+                                    placeholder="Tip 0.1 Ether?"
+                                />
+                              </li>
+                              <li key={`open-modal-button-${index}`} className="list-group-item py-2">
+                                <button
+                                  id={`button-comments${index}`}
+                                  className="btn btn-link btn-sm float-left pt-0"
+                                  name={post.pid}
+                                  onClick={() => this.openCommentsModal(post)}
+                                >
+                                  Comments
+                                </button>
+                                {(this.state.followingIdStringList > 0 && this.state.followingIdStringList.indexOf(post.authorId.toString()) > -1) ? 
+                                (<button
+                                  className="btn btn-link btn-sm float-right pt-0"
+                                  name={`follow-${post.pid}`}
+                                  onClick={(event) => {
+                                    console.log(event.target.name, "Following the author");
+                                    this.unFollowAuthor(post.authorId);
+                                  }}
+                                  disabled={this.props.account.localeCompare(post.author) === 0}
+                                >
+                                  Unfollow Author
+                                </button>)
+                                :                        
+                                (<button
+                                  className="btn btn-link btn-sm float-right pt-0"
+                                  name={`follow-${post.pid}`}
+                                  onClick={(event) => {
+                                    console.log(event.target.name, "Following the author");
+                                    this.followAuthor(post.authorId);
+                                  }}
+                                  disabled={this.props.account.localeCompare(post.author) === 0}
+                                >
+                                  Follow Author
+                                </button>)}
+                              </li>
+                            </ul>
+                          </div>
+                        )
+                      })}
                   </div>
-                )
-              })}
             </div>
 
             <Modal
@@ -311,10 +323,8 @@ class Card extends Component {
                 </Button>
                 {/* <Button variant="primary">Understood</Button> */}
               </Modal.Footer>
-            </Modal>            
-          </main>
+            </Modal>
         </div>
-      </div>
     );
   }
 }
