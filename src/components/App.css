@@ -36,8 +36,37 @@ body{
   width:100vw;
   height:100vh;
   background-color: #F9F9F9;
+	font-family: "Inter", sans-serif;
+	line-height: 1.5;
+	min-height: 100vh;
+	padding: 1rem 0;
+	font-size: clamp(1rem, 2.5vw, 1.125rem);
 }
 
+section {
+	width: 24%;
+	max-width: 800px;
+  box-shadow: 2px 0px #b5afaf;
+	
+	/* & + section {
+		margin-top: 2.5em;
+	} */
+}
+
+h1 {
+	font-weight: 700;
+	line-height: 1.125;
+	font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+}
+
+h2 {
+	margin-top: .25em;
+	color: #999;
+	font-size: clamp(1.125rem, 2.5vw, 1.25rem);
+	/* & + * {
+		margin-top: 1.5em;
+	} */
+}
 
 .book{
   top: 0;
@@ -134,7 +163,7 @@ body{
 
 .rowWiseContainer{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: wrap;
 }
 
@@ -200,4 +229,57 @@ div.rowWiseContainer > div {
 
 .UploadedMessage{
   font-size: 16px;
+}
+
+.postsContainer{
+  width: 64%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.cardDiv{
+  width: 48% !important;
+  margin: 4px;
+}
+
+.profileCardDiv{
+  min-width: 382px;
+  width: 48% !important;
+  margin: 4px;
+}
+
+.profileContainer{
+  margin-left: 20px;
+  margin-top: 32px;
+  display: flex;
+}
+
+.profilePosts{
+  margin-left: 20px;
+  width: 76%;
+}
+
+.btn-primary{
+  background-color: #212529;
+  border-color: #212529
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  background-color: #212529;
+  border-color: rgb(33, 37, 41);
+  box-shadow: 0 0 0 0.2rem rgb(33 37 41 / 50%);
+}
+
+.btn-primary:hover{
+  background-color: #212529;
+  border-color: rgb(33, 37, 41);
+}
+
+nav.nav-tabs a{
+  color: #212529 !important;
+}
+
+.ModalButton{
+  margin: 2px;
 }

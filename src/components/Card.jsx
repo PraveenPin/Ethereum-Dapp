@@ -34,14 +34,6 @@ class Card extends Component {
     this.fetchNetworkIds();
   }
 
-  // fetchAccountBalance = () => {
-  //   window.web3.eth.getBalance(this.props.account).then((accountBalance) => {
-  //     const floatBal = parseFloat(window.web3.utils.fromWei(accountBalance, 'Ether'));
-  //     console.log("final bal:",floatBal , typeof(floatBal));
-  //     this.setState({ accBalance: floatBal });
-  //   });
-  // }
-
   fetchNetworkIds = () => {
     this.setState({ isLoading: true });
     this.props.socialNetwork.methods.getAllFollowingIds().call({from: this.props.account})
@@ -191,11 +183,10 @@ class Card extends Component {
                     </form>
                     <p>&nbsp;</p>
                   </div>)}
-                  <div className="headerDivider"></div>
                   <div className="postsContainer">
                       {this.props.posts.map((post, index) => {
                         return(
-                          <div className="card mb-4" key={index} >
+                          <div className="card mb-4 cardDiv" key={index} >
                             <div className="card-header">
                               <img
                                 className='mr-2'
@@ -204,7 +195,7 @@ class Card extends Component {
                                 alt={`identicon-${index}`}
                                 src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                               />
-                              <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
+                              <strong className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</strong>
                             </div>
                             <ul id="postList" className="list-group list-group-flush">
                               <li className="list-group-item">
@@ -214,7 +205,7 @@ class Card extends Component {
                                 <p>{post.url}</p>
                               </li>
                               {!!post.picIpfsHash && (<li className="list-group-item">
-                                <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                                <img alt={index} width= "340px" height="230px" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
                               </li>)}
                               <li key={`li-${index}`} className="list-group-item py-2">
                                 <small className="float-left mt-1 text-muted">

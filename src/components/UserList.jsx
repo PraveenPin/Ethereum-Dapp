@@ -94,7 +94,7 @@ class UserList extends Component {
     let iterablePosts = this.state.searchIsOn ? this.state.usersInfo : this.state.totalUsersInfo;
    return (
       <div>
-        <Button variant="primary" onClick={this.handleShow}>
+        <Button className="ModalButton" variant="primary" onClick={this.handleShow}>
           {`See ${this.props.heading} List`}
         </Button>
 

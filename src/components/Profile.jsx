@@ -21,7 +21,17 @@ class Profile extends Component {
     if(!!this.props.userData){
       this.fetchMyPosts();
       this.fetchMySocialNetworkIds();
+      this.fetchAccountBalance();
     }
+  }
+  
+
+  fetchAccountBalance = () => {
+    window.web3.eth.getBalance(this.props.account).then((accountBalance) => {
+      const floatBal = parseFloat(window.web3.utils.fromWei(accountBalance, 'Ether'));
+      console.log("final bal:",floatBal , typeof(floatBal));
+      this.setState({ accBalance: floatBal });
+    });
   }
 
   async fetchMyPosts(){    
@@ -68,20 +78,95 @@ class Profile extends Component {
   render() {
     const {userData} = this.props;
     return (
-      <div style={{ width: '100%' }}>
-        {!!this.props.userData ? (<div className="row" style={{ flexDirection: 'column'}}>
-          <div>Id: {window.web3.utils.hexToNumber(userData.id)}</div>
-          <div>Name: {userData.name}</div>
-          <div>Followers: {window.web3.utils.hexToNumber(userData.followersCount)}</div>
-          <div>Following: {window.web3.utils.hexToNumberString(userData.followingCount)}</div>
-          <div>Total Tip Obtained : {window.web3.utils.fromWei(userData.tipObtained.toString(), 'Ether')} ETH</div>
-          <div>Total Tip Donated  : {window.web3.utils.fromWei(userData.tipDonated.toString(), 'Ether')} ETH</div>
-          <div>
-              My posts: 
+      <div>
+        {!!this.props.userData ? (<div className="profileContainer">
+
+        <section>
+          <h1>My Profile</h1>
+          <details>
+            <summary>
               <div>
+                <h3>
+                  {/* <small>Name: </small> */}
+                  <strong>{userData.name}</strong>
+                </h3>
+                {/* <span>{this.state.accBalance} ETH</span> */}
+              </div>
+            </summary>
+            <div>
+              <dl>
+                <div>
+                  <dt>Id: </dt>
+                  <dd>{window.web3.utils.hexToNumber(userData.id)}</dd>
+                </div>
+
+                <div>
+                  <dt>Coin Balance</dt>
+                  <dd>{this.state.accBalance} ETH</dd>
+                </div>
+
+                <div>
+                  <dt>Followers</dt>
+                  <dd>{window.web3.utils.hexToNumber(userData.followersCount)}</dd>
+                </div>
+
+                <div>
+                  <dt>Following</dt>
+                  <dd>{window.web3.utils.hexToNumberString(userData.followingCount)}</dd>
+                </div>
+              </dl>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <div>
+                <h3>
+                  <small>Tips: </small>
+                  <strong>{window.web3.utils.fromWei((userData.tipObtained + userData.tipDonated).toString(), 'Ether')} ETH</strong>
+                </h3>
+              </div>
+            </summary>
+            <div>
+              <dl>
+                <div>
+                  <dt>Tip Obtained</dt>
+                  <dd>{window.web3.utils.fromWei(userData.tipObtained.toString(), 'Ether')} ETH</dd>
+                </div>
+
+                <div>
+                  <dt>Tip Donated</dt>
+                  <dd>{window.web3.utils.fromWei(userData.tipDonated.toString(), 'Ether')} ETH</dd>
+                </div>
+              </dl>
+            </div>
+          </details>
+          <div>{this.state.isLoading ? "Loading Following List...." : 
+            <UserList 
+              heading={"Following"}
+              idList={this.state.myFollowingIds}
+              followingIdStringList={this.state.followingIdStringList}
+              socialNetwork={this.props.socialNetwork}
+              account={this.props.account}
+              tipPost={this.props.tipPost}
+            />}
+          </div>
+          <div>{this.state.isLoading ? "Loading Followers List...." : 
+            <UserList 
+              heading={"Followers"} 
+              idList={this.state.myFollowerIds}
+              followingIdStringList={this.state.followingIdStringList}
+              socialNetwork={this.props.socialNetwork}
+              account={this.props.account}
+              tipPost={this.props.tipPost}
+            />}
+          </div>
+        </section>
+          <div className="profilePosts">
+              <h3>My posts: </h3> 
+              <div className="postsContainer">
               {this.state.myPosts.map((post, index) => {
                 return(
-                  <div className="card mb-4" key={index} >
+                  <div className="card mb-4 profileCardDiv" key={index} >
                     <div className="card-header">
                       <img
                         className='mr-2'
@@ -90,7 +175,7 @@ class Profile extends Component {
                         alt={`identicon-${index}`}
                         src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
                       />
-                      <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
+                      <strong className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</strong>
                     </div>
                     <ul id="postList" className="list-group list-group-flush">
                       <li className="list-group-item">
@@ -100,7 +185,7 @@ class Profile extends Component {
                         <p>{post.url}</p>
                       </li>
                       {!!post.picIpfsHash && (<li className="list-group-item">
-                        <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                        <img alt={index} width= "340px" height="230px" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
                       </li>)}
                       <li key={index} className="list-group-item py-2">
                         <small className="float-left mt-1 text-muted">
@@ -109,30 +194,7 @@ class Profile extends Component {
                       </li>
                     </ul>
                 </div>)})}
-                <div>{this.state.isLoading ? "Loading Following List...." : 
-                  <UserList 
-                    heading={"Following"}
-                    idList={this.state.myFollowingIds}
-                    followingIdStringList={this.state.followingIdStringList}
-                    socialNetwork={this.props.socialNetwork}
-                    account={this.props.account}
-                    tipPost={this.props.tipPost}
-                  />}
-                </div>
-                <div>{this.state.isLoading ? "Loading Followers List...." : 
-                  <UserList 
-                    heading={"Followers"} 
-                    idList={this.state.myFollowerIds}
-                    followingIdStringList={this.state.followingIdStringList}
-                    socialNetwork={this.props.socialNetwork}
-                    account={this.props.account}
-                    tipPost={this.props.tipPost}
-                  />}
-                </div>
-                <div> 
-                  {/* <Button variant="primary" onClick={this.getAllHistory}>
-                    {this.state.logMessage}
-                  </Button> */}
+                <div>
                 </div>
               </div>
             </div>
