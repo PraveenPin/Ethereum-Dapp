@@ -167,6 +167,27 @@ contract SocialNetwork is owned{
         emit FetchMyNetworkIds(msg.sender,followingIds,followerIds);
         return (followingIds,followerIds);
     }
+    
+    function getWholeNetworkForAnId(uint myId) public returns (uint[] memory, uint[] memory){
+        require(myId > 0 && myId <= userCount);
+        User storage _user = users[myId];
+        uint[] memory followingIds = new uint[](_user.followingCount);
+        uint[] memory followerIds = new uint[](_user.followersCount);
+        uint counter = 0;
+        for (uint i = 1; i <= userCount; i++){
+            if(_user.followingIds[i]){
+                followingIds[counter++] = i;
+            }
+        }
+        counter = 0;
+        for (uint i = 1; i <= userCount; i++){
+            if(_user.followerIds[i]){
+                followerIds[counter++] = i;
+            }
+        }
+        emit FetchMyNetworkIds(_user.userAddress,followingIds,followerIds);
+        return (followingIds,followerIds);
+    }
 
     function getUserData(uint _uid) public view returns (uint, string memory, uint, uint, uint, uint){     
         require(_uid > 0);   

@@ -156,7 +156,7 @@ class Card extends Component {
                         <label htmlFor="postImage" style={{ display: 'flex', flexWrap: 'wrap', height:"28px", margin: '10px 0px 0px 14px'}}>
                         {!!this.state.imageBuffer ? <p className="UploadedMessage">Uploaded.. ✅</p> : <p className="UploadedMessage">Add an image</p> }                            
                           <IconButton color="primary" component="span">
-                            <AddIcon />
+                            <AddIcon style={{ fill: '#212529' }}/>
                           </IconButton>
                         </label>            
                       </div>
@@ -165,7 +165,7 @@ class Card extends Component {
                     <p>&nbsp;</p>
                   </div>) : 
                   (<div className="formContainer">
-                      <h4>&nbsp;Search: </h4>
+                      <h4 style={{ marginTop: '24px'}}>&nbsp;Search: </h4>
                       <form onSubmit={(event) => {
                         event.preventDefault();
                         this.props.fetchSearchKeyPosts(this.searchKey.value);
@@ -205,32 +205,34 @@ class Card extends Component {
                                 <p>{post.url}</p>
                               </li>
                               {!!post.picIpfsHash && (<li className="list-group-item">
-                                <img alt={index} width= "340px" height="230px" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                                <img alt={index} className="postPicture" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
                               </li>)}
                               <li key={`li-${index}`} className="list-group-item py-2">
                                 <small className="float-left mt-1 text-muted">
                                   TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
                                 </small>
-                                <button
-                                  id={`button-tipAmount${index}`}
-                                  className="btn btn-link btn-sm float-right pt-0"
-                                  name={post.pid}
-                                  onClick={(event) => {
-                                    if(document.getElementById(`tipAmount${index}`).value){
-                                      let tipAmount = window.web3.utils.toWei(document.getElementById(`tipAmount${index}`).value.toString(), 'Ether');
-                                      console.log(event.target.name, tipAmount);
-                                      this.props.tipPost(event.target.name, tipAmount);
-                                    }
-                                  }}
-                                >
-                                  TIP Ether
-                                </button>                        
-                                <input
-                                    id={`tipAmount${index}`}
-                                    type="number"
+                                <div style={{ padding: '4px 0px' }}>
+                                  <button
+                                    id={`button-tipAmount${index}`}
                                     className="btn btn-link btn-sm float-right pt-0"
-                                    placeholder="Tip 0.1 Ether?"
-                                />
+                                    name={post.pid}
+                                    onClick={(event) => {
+                                      if(document.getElementById(`tipAmount${index}`).value){
+                                        let tipAmount = window.web3.utils.toWei(document.getElementById(`tipAmount${index}`).value.toString(), 'Ether');
+                                        console.log(event.target.name, tipAmount);
+                                        this.props.tipPost(event.target.name, tipAmount);
+                                      }
+                                    }}
+                                  >
+                                    TIP Ether
+                                  </button>
+                                  <input
+                                      id={`tipAmount${index}`}
+                                      type="number"
+                                      className="btn btn-link btn-sm float-right pt-0"
+                                      placeholder="Tip 0.1 Ether?"
+                                  />
+                                </div>
                               </li>
                               <li key={`open-modal-button-${index}`} className="list-group-item py-2">
                                 <button

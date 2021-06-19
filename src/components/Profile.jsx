@@ -41,7 +41,7 @@ class Profile extends Component {
 
   fetchMySocialNetworkIds = () => {
     this.setState({ isLoading: true });
-    this.props.socialNetwork.methods.getAllFollowingIds().call({from: this.props.account})
+    this.props.socialNetwork.methods.getWholeNetworkForAnId(this.props.userData.id).call({from: this.props.account})
     .then((result) => {
       console.log("Ner",result, this.state);
       this.setState({ isLoading: false, myFollowingIds: result[0] ,myFollowerIds: result[1]} , () => this.convertFollowingIdsFromBNtoStrings());
@@ -82,15 +82,13 @@ class Profile extends Component {
         {!!this.props.userData ? (<div className="profileContainer">
 
         <section>
-          <h1>My Profile</h1>
+          {/* <h1>My Profile</h1> */}
           <details>
             <summary>
               <div>
                 <h3>
-                  {/* <small>Name: </small> */}
                   <strong>{userData.name}</strong>
                 </h3>
-                {/* <span>{this.state.accBalance} ETH</span> */}
               </div>
             </summary>
             <div>
@@ -122,7 +120,7 @@ class Profile extends Component {
               <div>
                 <h3>
                   <small>Tips: </small>
-                  <strong>{window.web3.utils.fromWei((userData.tipObtained + userData.tipDonated).toString(), 'Ether')} ETH</strong>
+                  <strong>{window.web3.utils.fromWei(userData.tipObtained.toString(), 'Ether')} ETH</strong>
                 </h3>
               </div>
             </summary>
@@ -185,7 +183,7 @@ class Profile extends Component {
                         <p>{post.url}</p>
                       </li>
                       {!!post.picIpfsHash && (<li className="list-group-item">
-                        <img alt={index} width= "340px" height="230px" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
+                        <img alt={index} className="postPicture" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
                       </li>)}
                       <li key={index} className="list-group-item py-2">
                         <small className="float-left mt-1 text-muted">

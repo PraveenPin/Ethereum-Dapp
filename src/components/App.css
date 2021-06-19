@@ -4,13 +4,6 @@
 }
 
 /* Styles go here */
-.react-emoji-picker--container{
-    position: unset;
-}
-
-.react-emoji-picker--wrapper{
-    width: 360px !important;
-}
 
 .nav{
     height: 42px;
@@ -168,10 +161,9 @@ h2 {
 }
 
 .formContainer{
-  width: 36%;
+  width: 32%;
   /* box-shadow: 2px 0px red; */
-  background-color: #f4f4f4;
-  opacity: 0.8;
+  background-color: #fdfbfb;
   border-radius: 9px 0px 9px 9px;
   box-shadow: 1px 0px #b5afaf;
   height: 100v;
@@ -232,7 +224,7 @@ div.rowWiseContainer > div {
 }
 
 .postsContainer{
-  width: 64%;
+  width: 68%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -282,4 +274,53 @@ nav.nav-tabs a{
 
 .ModalButton{
   margin: 2px;
+}
+
+.btn-link:hover{
+  color: rgb(23, 24, 26);
+}
+
+.btn-link{
+  color: rgb(16, 17, 19);
+}
+
+.react-emoji-picker--wrapper{
+  top: 0;
+}
+
+.emoji-mart-search{
+  width: 94%;
+}
+
+section.emoji-mart-category{
+  width: unset;
+}
+
+.commentsContainer{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  padding: 12px;
+  margin: 6px 0px;
+  border-top: 0.5px solid grey;
+  border-bottom: 0.5px solid grey;
+  border-radius: 10px;
+}
+
+.postPicture{
+  width: 100%;
+  max-height: 260px;
+}
+
+.otherProfileCard{
+  display: flex;
+  flex-direction: column;
+  width: 33%;
+  background: #fdfbfb;
+  border-radius: 1px;
+}
+
+.userList{
+  flex-direction: row;
+  flex-wrap: wrap;
 }

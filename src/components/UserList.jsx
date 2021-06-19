@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Button, Modal, ListGroup} from 'react-bootstrap';
 import Identicon from 'identicon.js';
-import { getIpfsHashFromBytes32 } from './utils';
+import Profile from './Profile';
 
 class UserList extends Component {
 
@@ -18,15 +18,15 @@ class UserList extends Component {
       searchIsOn: false,
       viewingPosts: []
     }
-    this.getUserData = this.getUserData.bind(this);
-    this.getUserPosts = this.getUserPosts.bind(this);
+    this.getUsersData = this.getUsersData.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
   }
 
   componentDidMount(){
-    this.getUserData();
+    this.getUsersData();
   }
 
-  async getUserData(){
+  async getUsersData(){
     this.setState({ isLoading: true });
     for(let i = 0; i<this.state.idList.length;i++){
       let userInfo = await this.props.socialNetwork.methods.getUserData(this.state.idList[i]).call({from: this.props.account});
@@ -35,12 +35,19 @@ class UserList extends Component {
     this.setState({ isLoading: false });
   }
 
-  async getUserPosts(id){
+  async getUserInfo(id){
     this.setState({ isLoadingProfileModal: true });
-    let userPosts = await this.props.socialNetwork.methods.getMyPosts(id).call({from: this.props.account});    
-    console.log("ViewingPosts:",userPosts);
-    this.setState({ isLoadingProfileModal: false, viewingPosts: userPosts[1] });
-  }
+    const userInfo = await this.props.socialNetwork.methods.getUserData(id).call({from: this.props.account});
+    console.log("User Data:", userInfo);
+    this.setState({ isLoadingProfileModal: false, userData: {
+        id: userInfo[0],
+        name: userInfo[1],
+        followersCount: userInfo[2],
+        followingCount: userInfo[3],
+        tipObtained: userInfo[4],
+        tipDonated: userInfo[5]
+      }});
+}
 
   handleClose = () => {
     this.setState({ show: false });
@@ -52,7 +59,7 @@ class UserList extends Component {
 
   handleShowProfileModal = (id) => {
     this.setState({ showProfileModal: true });
-    this.getUserPosts(id);
+    this.getUserInfo(id);
   }
 
   handleCloseProfileModal = () => {
@@ -131,17 +138,46 @@ class UserList extends Component {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="userList">
               {this.state.isLoading ? "Loading ...." : iterablePosts.length === 0 ? `${this.props.heading} No one` :
               iterablePosts.map((userData,index) => (
                 <ListGroup.Item key={`list-group-item-${index}`} onClick={() => console.log("Click")}
-                  style={{ display: 'flex', justifyContent: 'space-around'}}>
-                  <div>Id: {window.web3.utils.hexToNumber(userData[0])}</div>
-                  <div>Name: {userData[1]}</div>
-                  <div>Followers: {window.web3.utils.hexToNumber(userData[2])}</div>
-                  <div>Following: {window.web3.utils.hexToNumberString(userData[3])}</div>
-                  <div>Total Tip Obtained : {window.web3.utils.fromWei(userData[4].toString(), 'Ether')} ETH</div>
-                  <div>Total Tip Donated  : {window.web3.utils.fromWei(userData[5].toString(), 'Ether')} ETH</div>
+                  className="otherProfileCard">
+                  {/* <details> */}
+                    <summary>
+                      <div>
+                        <h3>
+                          <strong>{userData[1]}</strong>
+                        </h3>
+                      </div>
+                    </summary>
+                    <div>
+                      <dl>
+                        <div>
+                          <dt>Id: </dt>
+                          <dd>{window.web3.utils.hexToNumber(userData[0])}</dd>
+                        </div>
+                        <div>
+                          <dt>Followers</dt>
+                          <dd>{window.web3.utils.hexToNumber(userData[2])}</dd>
+                        </div>
+
+                        <div>
+                          <dt>Following</dt>
+                          <dd>{window.web3.utils.hexToNumberString(userData[3])}</dd>
+                        </div>
+                        <div>
+                          <dt>Tip Obtained</dt>
+                          <dd>{window.web3.utils.fromWei(userData[4].toString(), 'Ether')} ETH</dd>
+                        </div>
+
+                        <div>
+                          <dt>Tip Donated </dt>
+                          <dd>{window.web3.utils.fromWei(userData[5].toString(), 'Ether')} ETH</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  {/* </details> */}
                   
                   <Button variant="primary" onClick={() => this.handleShowProfileModal(userData[0])}>
                     {`Open Profile`}
@@ -193,82 +229,12 @@ class UserList extends Component {
           <Modal.Body>
             <ListGroup variant="flush">
               {this.state.isLoadingProfileModal ? "Loading ...." :
-              (<div>Posts:
-                {this.state.viewingPosts.map((post, index) => {
-                  return(
-                    <div className="card mb-4" key={index} >
-                      <div className="card-header">
-                        <img
-                          className='mr-2'
-                          width='30'
-                          height='30'
-                          alt={`identicon-${index}`}
-                          src={`data:image/png;base64,${new Identicon(post.author, 30).toString()}`}
-                        />
-                        <small className="text-muted">{post.authorName} : {window.web3.utils.hexToNumber(post.authorId)}</small>
-                      </div>
-                      <ul id="postList" className="list-group list-group-flush">
-                        <li className="list-group-item">
-                          <p>{post.content}</p>
-                        </li>
-                        <li className="list-group-item">
-                          <p>{post.url}</p>
-                        </li>                        
-                        {!!post.picIpfsHash && (<li className="list-group-item">
-                          <img alt={index} width= "100%" height="100%" src={`https://ipfs.io/ipfs/${getIpfsHashFromBytes32(post.picIpfsHash)}`}></img>
-                        </li>)}
-                        <li key={index} className="list-group-item py-2">
-                          <small className="float-left mt-1 text-muted">
-                            TIPS: {window.web3.utils.fromWei(post.tipAmount.toString(), 'Ether')} ETH
-                          </small>
-                          <button
-                            id={`button-modal-tipAmount${index}`}
-                            className="btn btn-link btn-sm float-right pt-0"
-                            name={post.pid}
-                            onClick={(event) => {
-                              const tip = document.getElementById(`modal-tipAmount${index}`).value;
-                              if(document.getElementById(`modal-tipAmount${index}`).value){
-                                let tipAmount = window.web3.utils.toWei(tip.toString(), 'Ether');
-                                console.log(event.target.name, tipAmount);
-                                this.props.tipPost(event.target.name, tipAmount);
-                              }
-                            }}
-                          >
-                            TIP Ether
-                          </button>                        
-                          <input
-                              id={`modal-tipAmount${index}`}
-                              type="number"
-                              className="btn btn-link btn-sm float-right pt-0"
-                              placeholder="Tip 0.1 Ether?"
-                          />
-                         {(this.props.followingIdStringList.length === 0 || this.props.followingIdStringList.indexOf(post.authorId.toString()) === -1) ?
-                         ( <button
-                            className="btn btn-link btn-sm float-right pt-0"
-                            name={`follow-${post.pid}`}
-                            onClick={(event) => {
-                              console.log(event.target.name, "Following the author");
-                              this.followAuthor(post.authorId);
-                            }}
-                          >
-                            Follow Author
-                          </button>)
-                         :( <button
-                            className="btn btn-link btn-sm float-right pt-0"
-                            name={`follow-${post.pid}`}
-                            onClick={(event) => {
-                              console.log(event.target.name, "UnFollowing the author");
-                              this.unFollowAuthor(post.authorId);
-                            }}
-                          >
-                            UnFollow Author
-                          </button>)}
-                        </li>
-                      </ul>
-                    </div>
-                  )
-                })}
-              </div>)}
+              (<Profile 
+                  account={this.props.account}
+                  socialNetwork={this.props.socialNetwork} 
+                  userData={this.state.userData}
+
+                />)}
             </ListGroup>
           </Modal.Body>
           <Modal.Footer>
