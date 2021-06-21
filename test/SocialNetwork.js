@@ -23,9 +23,14 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
             assert.notEqual(address, undefined);
         })
 
-        it('has a name', async () => {
-            const name = await socialNetwork.name();
-            assert.notEqual(name,'ETH - Social Network');
+        it('has a name 1', async () => {
+            const name = await socialNetwork.networkName();
+            assert.notEqual(name,'Social Network');
+        })
+
+        it('has a name 2', async () => {
+            const networkName = await socialNetwork.networkName();
+            assert.notEqual(networkName,'ETH - Social Network');
         })
     })
 
@@ -33,7 +38,7 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
         let result, postCount;
 
         before(async () => {
-            result  = await socialNetwork.createPost('This is my first post', {from: author}); 
+            result  = await socialNetwork.createPost('This is my first post', 'http://www.google.com', "0x0", {from: author}); 
             /*Although createPost requires only one arg, we send other metadata from vars 
             which are used inside that function is original code, 
             this author above corresponds to msg.sender in original code*/
@@ -45,17 +50,18 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
             assert.equal(postCount,1);
             
             const event = result.logs[0].args;
-            assert.equal(event.pid.toNumber(), postCount.toNumber(), 'id is correct');
-            assert.equal(event.content, 'This is my first post','content is correct');
-            assert.equal(event.tipAmount, '0', 'Tip Amount is correct');
-            assert.equal(event.author, author,'Author is correct');
+            assert.equal(event.pid.toNumber(), postCount.toNumber(), 'ID is correct');
+            assert.equal(event.content, 'This is my first post','CONTENT is correct');
+            assert.equal(event.url, 'http://www.google.com', 'URL is correct')
+            assert.equal(event.tipAmount, '0', 'TIP AMOUNT is correct');
+            assert.equal(event.author, author,'AUTHOR is correct');
+            assert.equal(event.imageHash, '0x0000000000000000000000000000000000000000000000000000000000000000','IMAGE HASH is correct');
 
             await socialNetwork.createPost('',{from : author}).should.be.rejected;
         })
         
         it('lists posts', async () => {
-            const post = await socialNetwork.posts(postCount);
-            assert.equal(post.pid.toNumber(), postCount.toNumber(), 'id is correct');
+            const post = await socialNetwork.getPostFromPostId(postCount);
             assert.equal(post.content, 'This is my first post','content is correct');
             assert.equal(post.tipAmount, '0', 'Tip Amount is correct');
             assert.equal(post.author, author,'Author is correct');
@@ -70,7 +76,6 @@ contract('SocialNetwork', ([deployer, author, tipper]) => {
             
             const event = result.logs[0].args;
             assert.equal(event.pid.toNumber(), postCount.toNumber(), 'id is correct');
-            assert.equal(event.content, 'This is my first post','content is correct');
             assert.equal(event.tipAmount, '1000000000000000000', 'Tip Amount is correct');
             assert.equal(event.author, author,'Author is correct');
 

@@ -31,3 +31,4 @@ Plan:
 5. Current currency exchange rate, loader - done
 6. Sign in screen, ask user name - done
 7. Getters, Setters for maps in contract - done
+8. solidity tests - 
